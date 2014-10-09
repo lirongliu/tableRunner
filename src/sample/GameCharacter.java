@@ -1,9 +1,11 @@
 package sample;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
 import javafx.scene.Group;
+import javafx.scene.transform.Rotate;
 
 /**
  * Created by lirong on 10/1/14.
@@ -14,6 +16,9 @@ public class GameCharacter extends GameObject {
     private long lastJumpStartTime;
     protected static double dampingRatio = 0.2 / Main.fps;  // per second
     public static double radius = 20;
+
+    private double leftBend;
+    private double rightBend;
 
     private Circle head;
     private Group leftLeg;
@@ -37,6 +42,8 @@ public class GameCharacter extends GameObject {
         leftLeg = new Group();
         leftLegUpper = new Rectangle(5, 10);
         leftLegLower = new Rectangle(5, 10);
+        leftLegUpper.setFill(Color.GRAY);
+        leftLegLower.setFill(Color.GRAY);
         leftLegLower.setTranslateY(10);
         leftLeg.setTranslateX(-2);
         leftLeg.setTranslateY(-20);
@@ -82,6 +89,18 @@ public class GameCharacter extends GameObject {
 
     @Override
     public void move() {
+        leftLeg.getTransforms().clear();
+        leftLeg.getTransforms().add(new Rotate(-90 * leftBend));
+
+        leftLegLower.getTransforms().clear();
+        leftLegLower.getTransforms().add(new Rotate(180 * leftBend));
+
+        rightLeg.getTransforms().clear();
+        rightLeg.getTransforms().add(new Rotate(-90 * rightBend));
+
+        rightLegLower.getTransforms().clear();
+        rightLegLower.getTransforms().add(new Rotate(180 * rightBend));
+
        // System.out.println("pos: " + getPositionX());
         if (getTranslateX() > 0 && velocityX > 0) {
             GameEngine.updateSceneSpeed(Math.min(GameEngine.defaultSceneSpeed, -velocityX + GameEngine.defaultSceneSpeed));
@@ -119,5 +138,10 @@ public class GameCharacter extends GameObject {
 
     private long now() {
         return System.nanoTime();
+    }
+
+    public void setBend(double leftBend, double rightBend) {
+        this.leftBend = leftBend;
+        this.rightBend = rightBend;
     }
 }
