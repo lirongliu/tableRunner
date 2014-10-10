@@ -148,7 +148,7 @@ public class GameEngine {
     // TODO: make sure it's correct
     void updateGroundCollision() {
 
-        if(gameCharacter.getTranslateY() > Main.GROUND_HEIGHT) {
+        if(gameCharacter.velocityY + gameCharacter.getTranslateY() > Main.SCENE_HEIGHT - Main.GROUND_HEIGHT) {
             gameCharacter.land();
         }
 
