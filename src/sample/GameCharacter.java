@@ -111,8 +111,8 @@ public class GameCharacter extends GameObject {
         rightLegLower.getTransforms().add(new Rotate(180 * rightBend));
 
        // System.out.println("pos: " + getPositionX());
-        if (getTranslateX() > 0 && velocityX > 0) {
-            GameEngine.updateSceneSpeed(Math.min(GameEngine.defaultSceneSpeed, -velocityX + GameEngine.defaultSceneSpeed));
+        if (getTranslateX() > 512 && velocityX > 0) {
+            GameEngine.updateSceneSpeed(-velocityX + GameEngine.defaultSceneSpeed);
             //System.out.println("pass mid point");
         } else {
             this.setTranslateX(this.getTranslateX() + velocityX);

@@ -20,7 +20,7 @@ import java.util.Random;
 public class GameEngine {
     final public static int fps = 50;   //  max fps
     final public static double gravity = 80.0 / fps;
-    final public static double defaultSceneSpeed = -200.0 / fps;      //  x coordinate
+    final public static double defaultSceneSpeed = -20.0 / fps;      //  x coordinate
 
     private static double sceneSpeed;      //  x coordinate
 
@@ -182,7 +182,7 @@ public class GameEngine {
 
         cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
 
-        cumulativeSceneDistance += Math.abs(defaultSceneSpeed);
+        cumulativeSceneDistance += Math.abs(sceneSpeed);
     }
 
     public EventHandler<KeyEvent> getPressHandler() {
