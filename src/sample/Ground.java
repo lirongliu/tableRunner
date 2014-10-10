@@ -7,6 +7,6 @@ import javafx.scene.shape.Shape;
  */
 public class Ground extends Obstacle {
     public Ground(Shape obj) {
-        super(obj, GameEngine.getSceneSpeed(), 0);
+        //super(obj, GameEngine.getSceneSpeed(), 0);
     }
 }

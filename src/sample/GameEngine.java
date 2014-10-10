@@ -3,7 +3,10 @@ package sample;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Shape;
@@ -47,12 +50,18 @@ public class GameEngine {
     private Queue<Obstacle> obstacleQueue;
     private Queue<Ground> groundQueue;
 
+
+    private Group cloudGroup;
+
+
     public GameEngine(Scene scene, SceneController sceneController, GameCharacter gameCharacter) {
         this.scene = scene;
         this.gameCharacter = gameCharacter;
         this.sceneController = sceneController;
         obstacleQueue = sceneController.getObstacleQueue();
         groundQueue = sceneController.getGroundQueue();
+
+        cloudGroup = sceneController.getCloudGroup();
     }
 
     public void setup() {
@@ -95,8 +104,8 @@ public class GameEngine {
                     gameCharacter.accelerate(100 / fps, 0);
                 } else if (keyEvent.getCode() == KeyCode.P) {
 
-                    System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxX());
-                    System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxY());
+                    //System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxX());
+                    //System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxY());
                     //System.out.println(gameCharacter.getPositionX() + " " + gameCharacter.getPositionY());
                 }
                 keyEvent.consume();
@@ -126,19 +135,24 @@ public class GameEngine {
 
                 lastSceneUpdateTime = now;
 
-                if (cumulativeSceneDistance - lastObstacleGeneratingDistance >
+                /*if (cumulativeSceneDistance - lastObstacleGeneratingDistance >
                         minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval))) {
                     sceneController.generateObstacle();
                     //System.out.println(obstacleQueue.size());
                     lastObstacleGeneratingDistance = cumulativeSceneDistance;
-                }
+                }*/
             }
         }.start();
     }
 
     // TODO: make sure it's correct
     void updateGroundCollision() {
-        //Shape gc = gameCharacter.getShapeObject();
+
+        if(gameCharacter.getTranslateY() > Main.GROUND_HEIGHT) {
+            gameCharacter.land();
+        }
+
+        /*//Shape gc = gameCharacter.getShapeObject();
         GameCharacter gc = gameCharacter;
 
         Bounds gcBounds = gc.localToParent(gc.getLayoutBounds());
@@ -151,7 +165,7 @@ public class GameEngine {
                     maxY + gameCharacter.velocityY > groundBounds.getMinY()) {
                 gameCharacter.land();
             }
-        }
+        }*/
     }
 
     void updateGameCharacter() {
@@ -165,6 +179,9 @@ public class GameEngine {
         for (Obstacle obj : groundQueue) {
             obj.move();
         }
+
+        cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
+
         cumulativeSceneDistance += Math.abs(defaultSceneSpeed);
     }
 

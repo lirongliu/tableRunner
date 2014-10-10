@@ -13,6 +13,6 @@ public class ThornObstacle extends Obstacle {
     public static int maxThornCountInARow = 6;
 
     public ThornObstacle(Shape obj) {
-        super(obj, GameEngine.getSceneSpeed(), 0);
+        //super(obj, GameEngine.getSceneSpeed(), 0);
     }
 }

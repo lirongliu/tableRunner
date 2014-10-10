@@ -12,6 +12,6 @@ public class RectangleObstacle extends Obstacle {
     public static int maxObstacleHeight = 250;
 
     public RectangleObstacle(Shape obj) {
-        super(obj, GameEngine.getSceneSpeed(), 0);
+        super(GameEngine.getSceneSpeed(), 0);
     }
 }

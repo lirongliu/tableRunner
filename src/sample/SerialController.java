@@ -38,7 +38,7 @@ public class SerialController implements SerialPortEventListener {
         try {
             serialPort.closePort();
         } catch (SerialPortException ex) {
-            ex.printStackTrace();
+            System.out.println(ex);
         }
     }
 

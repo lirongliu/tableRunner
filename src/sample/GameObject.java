@@ -7,7 +7,7 @@ import javafx.scene.Group;
  * Created by lirong on 10/1/14.
  */
 public abstract class GameObject extends Group {
-    protected Shape obj;
+    //protected Shape obj;
     protected double velocityX, velocityY;
 
     public void setVelocity(double x, double y) {
@@ -23,15 +23,15 @@ public abstract class GameObject extends Group {
         return velocityY;
     }
 
-    public Shape getShapeObject() {
+    /*public Shape getShapeObject() {
         return obj;
-    }
+    }*/
 
     abstract void move();
 
     abstract void updateSpeed();
 
-    // TODO: make it correct
+    /*// TODO: make it correct
     public double getPositionX() {
         return obj.getLayoutX() + obj.getTranslateX();
     }
@@ -39,5 +39,5 @@ public abstract class GameObject extends Group {
     // TODO: make it correct
     public double getPositionY() {
         return obj.getLayoutY() + obj.getTranslateY();
-    }
+    }*/
 }

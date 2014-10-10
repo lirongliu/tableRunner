@@ -11,14 +11,14 @@ public class Obstacle extends GameObject {
     public static int minObstacleHeight = 20;
     public static int maxObstacleHeight = 100;
 
-    public Obstacle(Shape obj) {
-        this.obj = obj;
+    public Obstacle(/*Shape obj*/) {
+        /*this.obj = obj;*/
         this.velocityX = GameEngine.getSceneSpeed();
         this.velocityY = 0.0;
     }
 
-    public Obstacle(Shape obj, double vx, double vy) {
-        this.obj = obj;
+    public Obstacle(/*Shape obj,*/ double vx, double vy) {
+        //this.obj = obj;
         this.velocityX = vx + GameEngine.getSceneSpeed();
         this.velocityY = vy;
         //System.out.println("Circle Speed: " + velocityX);
@@ -31,8 +31,8 @@ public class Obstacle extends GameObject {
 
     @Override
     public void move() {
-        obj.setTranslateX(obj.getTranslateX() + velocityX);
-        obj.setTranslateY(obj.getTranslateY() + velocityY);
+        setTranslateX(getTranslateX() + velocityX);
+        setTranslateY(getTranslateY() + velocityY);
         updateSpeed();
     }
 }

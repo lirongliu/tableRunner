@@ -2,6 +2,8 @@ package sample;
 
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 
@@ -29,13 +31,25 @@ public class SceneController {
     final private static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
 
 
+    private Group cloudGroup;
+
+
     public SceneController(Group root) {
         this.root = root;
         obstacleQueue = new LinkedList<Obstacle>();
         groundQueue = new LinkedList<Ground>();
+
+
+        cloudGroup = new Group();
+
+        Image cloudImage = new Image("sample/images/CloudBG.png");
+        cloudGroup.getChildren().add(new ImageView(cloudImage));
+
+        root.getChildren().add(cloudGroup);
+        cloudGroup.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 240);
     }
 
-    void generateObstacle() {
+    /*void generateObstacle() {
         String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
         if (obstacleType.equals("Rectangle")) {
             drawRectangleObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene,
@@ -71,14 +85,10 @@ public class SceneController {
         } else if (obstacleType.equals("Circle")) {
             drawCircleObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene, 0, 20, Color.BLACK);
         }
-    }
+    }*/
 
     GameCharacter generateCharacter() {
         int originalX = Main.SCENE_WIDTH / 3;
-
-        //Circle character = drawGameCharacter(originalX, 0, 20, Color.GREEN);
-        //Circle character = new Circle(0, 0, 20);
-        //character.setFill(Color.GREEN);
 
         GameCharacter gameCharacter = new GameCharacter(null);
         root.getChildren().add(gameCharacter);
@@ -94,17 +104,11 @@ public class SceneController {
         drawGround(Color.BLACK);
     }
 
-    /*Circle drawGameCharacter(double x, double y, double r, Color color) {
-        Circle circle = new Circle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - r, r);
-        circle.setFill(color);
-        return circle;
-    }*/
-
     Shape drawCircleObstacle(double x, double y, double r, Color color) {
         Circle circle = new Circle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - r, r);
         circle.setFill(color);
         root.getChildren().add(circle);
-        obstacleQueue.add(new CircleObstacle(circle));
+        //obstacleQueue.add(new CircleObstacle(circle));
         return circle;
     }
 
@@ -126,7 +130,6 @@ public class SceneController {
     }
 
     void drawThornObstacle(double x, double y, double w, double h, int count, Color color) {
-        //System.out.println("count" + count);
         for (int i = 0;i < count;i++) {
             Polygon triangle = new Polygon();
             triangle.getPoints().addAll(new Double[]{
@@ -137,7 +140,6 @@ public class SceneController {
             triangle.setFill(color);
             root.getChildren().add(triangle);
             obstacleQueue.add(new ThornObstacle(triangle));
-            //System.out.println("obstacleQueue size" + obstacleQueue.size());
         }
     }
 
@@ -145,10 +147,10 @@ public class SceneController {
     void clearOutdatedObstacles() {
         Iterator<Obstacle> iter = obstacleQueue.iterator();
         while (iter.hasNext()) {
-            Shape shape = iter.next().getShapeObject();
-            Bounds bounds = shape.getLayoutBounds();
-            double translateX = shape.getTranslateX();
-            double translateY = shape.getTranslateY();
+            Group obstacle = iter.next();
+            Bounds bounds = obstacle.getLayoutBounds();
+            double translateX = obstacle.getTranslateX();
+            double translateY = obstacle.getTranslateY();
             if (bounds.getMaxX() + translateX < -clearThreshold) iter.remove();
             else if (bounds.getMaxY() + translateY < -clearThreshold) iter.remove();
             else if (bounds.getMinX() + translateX > Main.SCENE_WIDTH + clearThreshold) iter.remove();
@@ -164,4 +166,7 @@ public class SceneController {
         return this.groundQueue;
     }
 
+    public Group getCloudGroup() {
+        return this.cloudGroup;
+    }
 }
