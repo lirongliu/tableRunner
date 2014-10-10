@@ -182,11 +182,13 @@ public class GameCharacter extends GameObject {
     private void DFA(int action) {
         if (action < 0) return;
         if (prevAction == action) return;
+        if (action == 0) {
+            readyToJumpTime = now();
+        }
         switch (state) {
             case 0:
                 if (action == 0) {
                     state = 11;
-                    readyToJumpTime = now();
                 } else if (action == 1) {
                     state = 1;
                 } else if (action == 2) {
@@ -292,7 +294,6 @@ public class GameCharacter extends GameObject {
             case 10:
                 if (action == 0) {
                     state = 11;
-                    readyToJumpTime = now();
                 } else {
                     if (action == 2) {
                         state = 9;
