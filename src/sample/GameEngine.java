@@ -31,7 +31,7 @@ public class GameEngine {
     private double minObstacleInterval;  //  distance
     private double maxObstacleInterval;  //  distance
 
-    final private int maxJumpingPower = 1500;     //  Increased Y velocity
+    final public static double maxJumpingPower = 1500;     //  Increased Y velocity
 
     // Event handling variables
     private long lastJumpPressTime;     //  Last time the jump button was pressed
@@ -82,11 +82,11 @@ public class GameEngine {
             public void handle(KeyEvent keyEvent) {
                 long now = timeNow();
                 if (keyEvent.getCode() == KeyCode.SPACE) {     //  jump
-                    int power;
+                    double power;
                     long totalJumpPressTime = now - lastJumpPressTime;
 
                     // TODO: do it better
-                    power = (int)Math.min(maxJumpingPower, (double)totalJumpPressTime / maxJumpPressTime * maxJumpingPower);
+                    power = Math.min(maxJumpingPower, (double)totalJumpPressTime / maxJumpPressTime * maxJumpingPower);
 
                     gameCharacter.jump(power);
                     jumpKeyRelease = true;

@@ -32,6 +32,14 @@ public class GameCharacter extends GameObject {
     final private double initialXVelocityDampingRatio = 0.002;
     final private double XVelocityDampingRatioMultiplier = 1.05;
 
+    final private double BEND = 0.55;
+    final private double NOT_BEND = 0.4;
+
+    private long readyToJumpTime;
+
+    private int prevAction;
+    private int state;
+
     public GameCharacter(Shape obj) {
         velocityX = GameEngine.getSceneSpeed();
         velocityY = 0.0;
@@ -72,10 +80,11 @@ public class GameCharacter extends GameObject {
         lastXVelocityDecrease = -aX;
     }
 
-    public void jump(int power) {
+    public void jump(double power) {
         if (jumping) return;
         velocityY -= power / Main.fps;
         jumping = true;
+        System.out.println("jump");
     }
 
     public void damping() {
@@ -143,5 +152,176 @@ public class GameCharacter extends GameObject {
     public void setBend(double leftBend, double rightBend) {
         this.leftBend = leftBend;
         this.rightBend = rightBend;
+        int action = -1;
+        if (leftBend < NOT_BEND) {
+            if (rightBend < NOT_BEND) {
+                action = 0;    //  not considered right now
+            } else if (rightBend > BEND) {
+                action = 1;
+            }
+        } else if (leftBend > BEND) {
+            if (rightBend < NOT_BEND) {
+                action = 2;
+            } else if (rightBend > BEND) {
+                action = 3;
+            }
+        }
+        //System.out.println("leftBend: " + leftBend + "\t" + "rightBend: " + rightBend + "\t" + "action: " + action);
+        DFA(action);
+    }
+
+    public void walk() {
+        System.out.println("walk");
+        accelerate(100 / Main.fps, 0);
+    }
+
+    public void kick() {
+        System.out.println("kick");
+    }
+
+    private void DFA(int action) {
+        if (action < 0) return;
+        if (prevAction == action) return;
+        switch (state) {
+            case 0:
+                if (action == 0) {
+                    state = 11;
+                    readyToJumpTime = now();
+                } else if (action == 1) {
+                    state = 1;
+                } else if (action == 2) {
+                    state = 3;
+                }
+                break;
+            case 1:
+                if (action == 0) {
+                    state = 11;
+                } else {
+                    if (action == 2) {
+                        state = 9;
+                    } else if (action == 3) {
+                        state = 2;
+                    }
+                    walk();
+                }
+                break;
+            case 2:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 5;
+                    kick();
+                } else if (action == 2) {
+                    state = 3;
+                }
+                break;
+            case 3:
+                if (action == 0) {
+                    state = 11;
+                } else {
+                    if (action == 1) {
+                        state = 10;
+                    } else if (action == 3) {
+                        state = 4;
+                    }
+                    walk();
+                }
+                break;
+            case 4:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 1;
+                } else if (action == 2) {
+                    state = 7;
+                    kick();
+                }
+                break;
+            case 5:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 2) {
+                    state = 9;
+                    walk();
+                } else if (action == 3) {
+                    state = 6;
+                }
+                break;
+            case 6:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 5;
+                    kick();
+                } else if (action == 2) {
+                    state = 3;
+                }
+                break;
+            case 7:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 10;
+                    walk();
+                } else if (action == 3) {
+                    state = 8;
+                }
+                break;
+            case 8:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 1;
+                } else if (action == 2) {
+                    state = 7;
+                    kick();
+                }
+                break;
+            case 9:
+                if (action == 0) {
+                    state = 11;
+                } else {
+                    if (action == 1) {
+                        state = 10;
+                    } else if (action == 3) {
+                        state = 4;
+                    }
+                    walk();
+                }
+                break;
+            case 10:
+                if (action == 0) {
+                    state = 11;
+                    readyToJumpTime = now();
+                } else {
+                    if (action == 2) {
+                        state = 9;
+                    } else if (action == 3) {
+                        state = 2;
+                    }
+                    walk();
+                }
+                break;
+            case 11:
+                if (action == 1) {
+                    state = 1;
+                } else if (action == 2) {
+                    state = 3;
+                } else if (action == 3) {
+                    jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
+                    state = 12;
+                }
+                break;
+            case 12:
+                if (action == 0) {
+                    state = 11;
+                } else if (action == 1) {
+                    state = 1;
+                } else if (action == 2) {
+                    state = 3;
+                }
+                break;
+        }
+        prevAction = action;
     }
 }
