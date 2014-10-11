@@ -230,6 +230,7 @@ public class GameCharacter extends GameObject {
         }
         switch (state) {
             case 0:
+                // Initial state
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -239,6 +240,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 1:
+                // Lift up Leg A
                 if (action == 0) {
                     state = 11;
                 } else {
@@ -251,6 +253,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 2:
+                // Put down Leg A. Just finished one step.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -261,6 +264,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 3:
+                // Lift up Leg B
                 if (action == 0) {
                     state = 11;
                 } else {
@@ -273,6 +277,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 4:
+                // Put down Leg B. Just finished one step.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -283,6 +288,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 5:
+                // Lift up Leg A. Just finished kicking.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 2) {
@@ -293,6 +299,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 6:
+                // Put down Leg A.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -303,6 +310,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 7:
+                // Lift up Leg B. Just finished kicking.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -313,6 +321,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 8:
+                // Put down Leg B.
                 if (action == 0) {
                     state = 11;
                 } else if (action == 1) {
@@ -323,6 +332,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 9:
+                // Put down Leg A while lifting Leg B. Just finished one step.
                 if (action == 0) {
                     state = 11;
                 } else {
@@ -335,6 +345,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 10:
+                // Put down Leg B while lifting Leg A. Just finished one step.
                 if (action == 0) {
                     state = 11;
                 } else {
@@ -347,6 +358,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 11:
+                // Ready to jump.
                 if (action == 1) {
                     state = 1;
                 } else if (action == 2) {
@@ -357,6 +369,7 @@ public class GameCharacter extends GameObject {
                 }
                 break;
             case 12:
+                // Jump
                 if (action == 0) {
                     state = 11;
                     jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
