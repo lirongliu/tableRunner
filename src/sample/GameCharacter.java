@@ -18,6 +18,7 @@ public class GameCharacter extends GameObject {
     private double leftBend;
     private double rightBend;
 
+    private Group body;
     private ImageView head;
     private Group leftLeg;
     private ImageView leftLegUpper;
@@ -49,6 +50,8 @@ public class GameCharacter extends GameObject {
         Image upperLegImage = new Image("sample/images/UpperLeg.png");
         Image lowerLegImage = new Image("sample/images/LowerLeg.png");
         Image footImage = new Image("sample/images/Foot.png");
+
+        body = new Group();
 
         head = new ImageView(headImage);
         head.setTranslateY(-50);
@@ -83,9 +86,11 @@ public class GameCharacter extends GameObject {
         rightLeg.getChildren().add(rightLegLower);
         //rightLeg.getChildren().add(rightFoot);
 
-        this.getChildren().add(leftLeg);
-        this.getChildren().add(head);
-        this.getChildren().add(rightLeg);
+        body.getChildren().add(leftLeg);
+        body.getChildren().add(head);
+        body.getChildren().add(rightLeg);
+
+        this.getChildren().add(body);
     }
 
     public void accelerate(double aX, double aY) {
@@ -114,26 +119,38 @@ public class GameCharacter extends GameObject {
 
     @Override
     public void move() {
+
+        System.out.println(state);
+
         leftLeg.getTransforms().clear();
-        leftLeg.getTransforms().add(new Rotate(120 * leftBend - 60, 3, 0));
-
         leftLegLower.getTransforms().clear();
-        // leftLegLower.getTransforms().add(new Rotate(160 * leftBend, 3, 2.5));
-
         rightLeg.getTransforms().clear();
-        rightLeg.getTransforms().add(new Rotate(120 * rightBend - 60, 4, 0));
-
         rightLegLower.getTransforms().clear();
-        //rightLegLower.getTransforms().add(new Rotate(160 * rightBend, 3, 2.5));
 
-        //rightLegLower.getTransforms().add(new Rotate(160 * (-1 * rightBend*(rightBend-2)), 3, 2.5));
-        if((state == 2) || (state == 9)) {
-            leftLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((leftBend - 1), 2) - 1), 3, 2.5));
-            rightLegLower.getTransforms().add(new Rotate(160 * Math.pow(rightBend, 2), 3, 2.5));
+        if((state == 2) || (state == 9) || (state == 4) || (state == 10)) {
+
+            leftLeg.getTransforms().add(new Rotate(120 * leftBend - 60, 4, 0));
+            rightLeg.getTransforms().add(new Rotate(120 * rightBend - 60, 4, 0));
+
+            //rightLegLower.getTransforms().add(new Rotate(160 * (-1 * rightBend*(rightBend-2)), 3, 2.5));
+            if((state == 2) || (state == 9)) {
+                leftLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((leftBend - 1), 2) - 1), 3, 2.5));
+                rightLegLower.getTransforms().add(new Rotate(160 * Math.pow(rightBend, 2), 3, 2.5));
+            } else {
+                leftLegLower.getTransforms().add(new Rotate(160 * Math.pow(leftBend, 2), 3, 2.5));
+                rightLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((rightBend - 1), 2) - 1), 3, 2.5));
+            }
         } else {
-            leftLegLower.getTransforms().add(new Rotate(160 * Math.pow(leftBend, 2), 3, 2.5));
-            rightLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((rightBend - 1), 2) - 1), 3, 2.5));
+            leftLeg.getTransforms().add(new Rotate(-80 * leftBend, 4, 0));
+            rightLeg.getTransforms().add(new Rotate(-80 * rightBend, 4, 0));
+            leftLegLower.getTransforms().add(new Rotate(160 * leftBend, 3, 2.5));
+            rightLegLower.getTransforms().add(new Rotate(160 * rightBend, 3, 2.5));
         }
+
+
+        double vertOffset = body.getBoundsInLocal().getMaxY();
+        System.out.println("vert " + vertOffset);
+        body.setTranslateY(-vertOffset);
 
 
        // System.out.println("pos: " + getPositionX());
@@ -335,13 +352,14 @@ public class GameCharacter extends GameObject {
                 } else if (action == 2) {
                     state = 3;
                 } else if (action == 3) {
-                    jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
+                    //jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
                     state = 12;
                 }
                 break;
             case 12:
                 if (action == 0) {
                     state = 11;
+                    jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
                 } else if (action == 1) {
                     state = 1;
                 } else if (action == 2) {
