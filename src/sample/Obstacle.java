@@ -13,8 +13,8 @@ public class Obstacle extends GameObject {
 
     public Obstacle(/*Shape obj*/) {
         /*this.obj = obj;*/
-        this.velocityX = GameEngine.getSceneSpeed();
-        this.velocityY = 0.0;
+        //this.velocityX = GameEngine.getSceneSpeed();
+        //this.velocityY = 0.0;
     }
 
     public Obstacle(/*Shape obj,*/ double vx, double vy) {
@@ -26,7 +26,7 @@ public class Obstacle extends GameObject {
 
     @Override
     public void updateSpeed() {
-        velocityX = GameEngine.getSceneSpeed();
+        //velocityX = GameEngine.getSceneSpeed();
     }
 
     @Override

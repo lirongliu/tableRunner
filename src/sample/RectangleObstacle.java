@@ -1,6 +1,7 @@
 package sample;
 
-import javafx.scene.shape.Shape;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 /**
  * Created by lirong on 10/3/14.
@@ -11,7 +12,11 @@ public class RectangleObstacle extends Obstacle {
     public static int minObstacleHeight = 20;
     public static int maxObstacleHeight = 250;
 
-    public RectangleObstacle(Shape obj) {
-        super(GameEngine.getSceneSpeed(), 0);
+    public RectangleObstacle(int width, int height) {
+        Rectangle rec = new Rectangle(0, 0, width, height);
+        rec.setFill(Color.BLACK);
+
+        rec.setTranslateY(-height);
+        getChildren().add(rec);
     }
 }

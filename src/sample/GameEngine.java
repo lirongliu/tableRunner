@@ -52,6 +52,7 @@ public class GameEngine {
 
 
     private Group cloudGroup;
+    private Group sceneGroup;
 
 
     public GameEngine(Scene scene, SceneController sceneController, GameCharacter gameCharacter) {
@@ -62,6 +63,7 @@ public class GameEngine {
         groundQueue = sceneController.getGroundQueue();
 
         cloudGroup = sceneController.getCloudGroup();
+        sceneGroup = sceneController.getSceneGroup();
     }
 
     public void setup() {
@@ -135,12 +137,12 @@ public class GameEngine {
 
                 lastSceneUpdateTime = now;
 
-                /*if (cumulativeSceneDistance - lastObstacleGeneratingDistance >
+                if (cumulativeSceneDistance - lastObstacleGeneratingDistance >
                         minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval))) {
                     sceneController.generateObstacle();
                     //System.out.println(obstacleQueue.size());
                     lastObstacleGeneratingDistance = cumulativeSceneDistance;
-                }*/
+                }
             }
         }.start();
     }
@@ -181,6 +183,7 @@ public class GameEngine {
         }
 
         cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
+        sceneGroup.setTranslateX(-cumulativeSceneDistance);
 
         cumulativeSceneDistance += Math.abs(sceneSpeed);
     }

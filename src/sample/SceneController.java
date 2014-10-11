@@ -32,7 +32,7 @@ public class SceneController {
 
 
     private Group cloudGroup;
-
+    private Group sceneGroup;
 
     public SceneController(Group root) {
         this.root = root;
@@ -47,26 +47,32 @@ public class SceneController {
 
         root.getChildren().add(cloudGroup);
         cloudGroup.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 240);
+
+
+        sceneGroup = new Group();
+        root.getChildren().add(sceneGroup);
+        sceneGroup.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
     }
 
-    /*void generateObstacle() {
-        String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
-        if (obstacleType.equals("Rectangle")) {
-            drawRectangleObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene,
-                    0,
-                    RectangleObstacle.minObstacleWidth +
-                            rand.nextInt(
-                                    RectangleObstacle.maxObstacleWidth -
-                                    RectangleObstacle.minObstacleWidth + 1
-                            ),
-                    RectangleObstacle.minObstacleHeight +
-                            rand.nextInt(
-                                    RectangleObstacle.maxObstacleHeight -
-                                    RectangleObstacle.minObstacleHeight + 1
-                            ),
-                    Color.BLACK
-            );
-        } else if (obstacleType.equals("Thorn")) {
+    void generateObstacle() {
+        //String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
+        //if (obstacleType.equals("Rectangle")) {
+            RectangleObstacle rec = new RectangleObstacle(
+                                            RectangleObstacle.minObstacleWidth +
+                                                rand.nextInt(
+                                                    RectangleObstacle.maxObstacleWidth -
+                                                    RectangleObstacle.minObstacleWidth + 1
+                                                ),
+                                            RectangleObstacle.minObstacleHeight +
+                                                rand.nextInt(
+                                                    RectangleObstacle.maxObstacleHeight -
+                                                    RectangleObstacle.minObstacleHeight + 1
+                                            ));
+
+            rec.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup.getChildren().add(rec);
+            obstacleQueue.add(rec);
+        /*} else if (obstacleType.equals("Thorn")) {
             drawThornObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene,
                     0,
                     ThornObstacle.minObstacleWidth +
@@ -84,8 +90,8 @@ public class SceneController {
             );
         } else if (obstacleType.equals("Circle")) {
             drawCircleObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene, 0, 20, Color.BLACK);
-        }
-    }*/
+        }*/
+    }
 
     GameCharacter generateCharacter() {
         int originalX = Main.SCENE_WIDTH / 3;
@@ -112,22 +118,17 @@ public class SceneController {
         return circle;
     }
 
-    Line drawGround(Color color) {
-        Line line = new Line(0, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT,
-                30000, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
-        line.setFill(color);
-        root.getChildren().add(line);
-        groundQueue.add(new Ground(line));
-        return line;
+    void drawGround(Color color) {
+        Ground newGround = new Ground(20000);
+        sceneGroup.getChildren().add(newGround);
+        groundQueue.add(newGround);
     }
 
-    Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
-        Rectangle rec = new Rectangle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - h - y, w, h);
-        rec.setFill(color);
+    /*Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
         root.getChildren().add(rec);
         obstacleQueue.add(new RectangleObstacle(rec));
         return rec;
-    }
+    }*/
 
     void drawThornObstacle(double x, double y, double w, double h, int count, Color color) {
         for (int i = 0;i < count;i++) {
@@ -168,5 +169,9 @@ public class SceneController {
 
     public Group getCloudGroup() {
         return this.cloudGroup;
+    }
+
+    public Group getSceneGroup() {
+        return this.sceneGroup;
     }
 }
