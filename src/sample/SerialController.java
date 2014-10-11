@@ -19,7 +19,7 @@ public class SerialController implements SerialPortEventListener {
             System.out.print(name);
         }
 
-        serialPort = new SerialPort("/dev/cu.usbmodem1411");
+        serialPort = new SerialPort("/dev/tty.usbmodemfa131");
 
         try {
             serialPort.openPort();

@@ -96,7 +96,7 @@ public class SceneController {
     GameCharacter generateCharacter() {
         int originalX = Main.SCENE_WIDTH / 3;
 
-        GameCharacter gameCharacter = new GameCharacter(null);
+        GameCharacter gameCharacter = new GameCharacter();
         root.getChildren().add(gameCharacter);
 
         gameCharacter.setTranslateX(originalX);

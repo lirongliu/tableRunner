@@ -1,10 +1,8 @@
 package sample;
 
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Circle;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -20,13 +18,15 @@ public class GameCharacter extends GameObject {
     private double leftBend;
     private double rightBend;
 
-    private Circle head;
+    private ImageView head;
     private Group leftLeg;
-    private Rectangle leftLegUpper;
-    private Rectangle leftLegLower;
+    private ImageView leftLegUpper;
+    private ImageView leftLegLower;
+    private ImageView leftFoot;
     private Group rightLeg;
-    private Rectangle rightLegUpper;
-    private Rectangle rightLegLower;
+    private ImageView rightLegUpper;
+    private ImageView rightLegLower;
+    private ImageView rightFoot;
     
     private double lastXVelocityDecrease;
     final private double initialXVelocityDampingRatio = 0.002;
@@ -40,35 +40,51 @@ public class GameCharacter extends GameObject {
     private int prevAction;
     private int state;
 
-    public GameCharacter(Shape obj) {
+    public GameCharacter() {
         velocityX = GameEngine.getSceneSpeed();
         velocityY = 0.0;
         jumping = false;
 
-        head = new Circle(0, -35, 4);
+        Image headImage = new Image("sample/images/Body.png");
+        Image upperLegImage = new Image("sample/images/UpperLeg.png");
+        Image lowerLegImage = new Image("sample/images/LowerLeg.png");
+        Image footImage = new Image("sample/images/Foot.png");
+
+        head = new ImageView(headImage);
+        head.setTranslateY(-50);
 
         leftLeg = new Group();
-        leftLegUpper = new Rectangle(5, 10);
-        leftLegLower = new Rectangle(5, 10);
-        leftLegUpper.setFill(Color.GRAY);
-        leftLegLower.setFill(Color.GRAY);
-        leftLegLower.setTranslateY(10);
-        leftLeg.setTranslateX(-2);
+        leftLegUpper = new ImageView(upperLegImage);
+        leftLegLower = new ImageView(lowerLegImage);
+        leftFoot = new ImageView(footImage);
+        leftLegUpper.setTranslateY(-4);
+        leftLegLower.setTranslateX(2);
+        leftLegLower.setTranslateY(8);
+        leftFoot.setTranslateX(2);
+        leftFoot.setTranslateY(8);
+        leftLeg.setTranslateX(4);
         leftLeg.setTranslateY(-20);
         leftLeg.getChildren().add(leftLegUpper);
         leftLeg.getChildren().add(leftLegLower);
+        //leftLeg.getChildren().add(leftFoot);
 
         rightLeg = new Group();
-        rightLegUpper = new Rectangle(5, 10);
-        rightLegLower = new Rectangle(5, 10);
-        rightLegLower.setTranslateY(10);
-        rightLeg.setTranslateX(-2);
+        rightLegUpper = new ImageView(upperLegImage);
+        rightLegLower = new ImageView(lowerLegImage);
+        rightFoot = new ImageView(footImage);
+        rightLegUpper.setTranslateY(-4);
+        rightLegLower.setTranslateX(2);
+        rightLegLower.setTranslateY(8);
+        rightFoot.setTranslateX(2);
+        rightFoot.setTranslateY(8);
+        rightLeg.setTranslateX(4);
         rightLeg.setTranslateY(-20);
         rightLeg.getChildren().add(rightLegUpper);
         rightLeg.getChildren().add(rightLegLower);
+        //rightLeg.getChildren().add(rightFoot);
 
-        this.getChildren().add(head);
         this.getChildren().add(leftLeg);
+        this.getChildren().add(head);
         this.getChildren().add(rightLeg);
     }
 
@@ -99,16 +115,16 @@ public class GameCharacter extends GameObject {
     @Override
     public void move() {
         leftLeg.getTransforms().clear();
-        leftLeg.getTransforms().add(new Rotate(-90 * leftBend));
+        leftLeg.getTransforms().add(new Rotate(90 * leftBend - 45, 3, 0));
 
         leftLegLower.getTransforms().clear();
-        leftLegLower.getTransforms().add(new Rotate(180 * leftBend));
+        leftLegLower.getTransforms().add(new Rotate(160 * leftBend, 3, 2.5));
 
         rightLeg.getTransforms().clear();
-        rightLeg.getTransforms().add(new Rotate(-90 * rightBend));
+        rightLeg.getTransforms().add(new Rotate(90 * rightBend - 45, 4, 0));
 
         rightLegLower.getTransforms().clear();
-        rightLegLower.getTransforms().add(new Rotate(180 * rightBend));
+        rightLegLower.getTransforms().add(new Rotate(160 * rightBend, 3, 2.5));
 
        // System.out.println("pos: " + getPositionX());
         if (getTranslateX() > 512 && velocityX > 0) {
@@ -171,7 +187,7 @@ public class GameCharacter extends GameObject {
     }
 
     public void walk() {
-        System.out.println("walk");
+        System.out.println("Walk: " + state);
         accelerate(100 / Main.fps, 0);
     }
 
