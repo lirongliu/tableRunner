@@ -115,16 +115,26 @@ public class GameCharacter extends GameObject {
     @Override
     public void move() {
         leftLeg.getTransforms().clear();
-        leftLeg.getTransforms().add(new Rotate(90 * leftBend - 45, 3, 0));
+        leftLeg.getTransforms().add(new Rotate(120 * leftBend - 60, 3, 0));
 
         leftLegLower.getTransforms().clear();
-        leftLegLower.getTransforms().add(new Rotate(160 * leftBend, 3, 2.5));
+        // leftLegLower.getTransforms().add(new Rotate(160 * leftBend, 3, 2.5));
 
         rightLeg.getTransforms().clear();
-        rightLeg.getTransforms().add(new Rotate(90 * rightBend - 45, 4, 0));
+        rightLeg.getTransforms().add(new Rotate(120 * rightBend - 60, 4, 0));
 
         rightLegLower.getTransforms().clear();
-        rightLegLower.getTransforms().add(new Rotate(160 * rightBend, 3, 2.5));
+        //rightLegLower.getTransforms().add(new Rotate(160 * rightBend, 3, 2.5));
+
+        //rightLegLower.getTransforms().add(new Rotate(160 * (-1 * rightBend*(rightBend-2)), 3, 2.5));
+        if((state == 2) || (state == 9)) {
+            leftLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((leftBend - 1), 2) - 1), 3, 2.5));
+            rightLegLower.getTransforms().add(new Rotate(160 * Math.pow(rightBend, 2), 3, 2.5));
+        } else {
+            leftLegLower.getTransforms().add(new Rotate(160 * Math.pow(leftBend, 2), 3, 2.5));
+            rightLegLower.getTransforms().add(new Rotate(-160 * (Math.pow((rightBend - 1), 2) - 1), 3, 2.5));
+        }
+
 
        // System.out.println("pos: " + getPositionX());
         if (getTranslateX() > 512 && velocityX > 0) {
