@@ -120,7 +120,7 @@ public class GameCharacter extends GameObject {
     @Override
     public void move() {
 
-        System.out.println(state);
+        //System.out.println(state);
 
         leftLeg.getTransforms().clear();
         leftLegLower.getTransforms().clear();
@@ -149,7 +149,7 @@ public class GameCharacter extends GameObject {
 
 
         double vertOffset = body.getBoundsInLocal().getMaxY();
-        System.out.println("vert " + vertOffset);
+        //System.out.println("vert " + vertOffset);
         body.setTranslateY(-vertOffset);
 
 
