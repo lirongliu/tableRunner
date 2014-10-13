@@ -97,10 +97,10 @@ public class SceneController {
         int originalX = Main.SCENE_WIDTH / 3;
 
         GameCharacter gameCharacter = new GameCharacter();
-        root.getChildren().add(gameCharacter);
+        sceneGroup.getChildren().add(gameCharacter);
 
         gameCharacter.setTranslateX(originalX);
-        gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
+        //gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
 
         return gameCharacter;
     }

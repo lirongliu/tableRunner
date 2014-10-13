@@ -133,6 +133,20 @@ public class GameEngine {
                 //updateWithGroundCollision();
                 updateObstaclesAndGround();
                 updateGameCharacter();
+
+                // Now update the scene position
+                cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
+                sceneGroup.setTranslateX(-cumulativeSceneDistance);
+
+                double characterOffset = gameCharacter.getTranslateX() + sceneGroup.getTranslateX();
+                
+                if(characterOffset > 512) {
+                    cumulativeSceneDistance += characterOffset - 512;
+                }
+
+                cumulativeSceneDistance += Math.abs(sceneSpeed);
+
+
                 sceneController.clearOutdatedObstacles();
 
                 lastSceneUpdateTime = now;
@@ -150,7 +164,7 @@ public class GameEngine {
     // TODO: make sure it's correct
     void updateGroundCollision() {
 
-        if(gameCharacter.velocityY + gameCharacter.getTranslateY() > Main.SCENE_HEIGHT - Main.GROUND_HEIGHT) {
+        if(gameCharacter.velocityY + gameCharacter.getTranslateY() > 0) {
             gameCharacter.land();
         }
 
@@ -181,11 +195,6 @@ public class GameEngine {
         for (Obstacle obj : groundQueue) {
             obj.move();
         }
-
-        cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
-        sceneGroup.setTranslateX(-cumulativeSceneDistance);
-
-        cumulativeSceneDistance += Math.abs(sceneSpeed);
     }
 
     public EventHandler<KeyEvent> getPressHandler() {
