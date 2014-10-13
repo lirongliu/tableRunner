@@ -149,6 +149,7 @@ public class GameCharacter extends GameObject {
 
 
         double vertOffset = body.getBoundsInLocal().getMaxY();
+
         body.setTranslateY(-vertOffset);
 
 

@@ -9,6 +9,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.*;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 import java.util.Queue;
@@ -31,8 +33,8 @@ public class GameEngine {
     private long lastSceneUpdateTime;
     private double lastObstacleGeneratingDistance;  //  absolute value
     private double cumulativeSceneDistance; //  absolute value
-    private double minObstacleInterval;  //  distance
-    private double maxObstacleInterval;  //  distance
+    private double minObstacleInterval = 300;  //  distance
+    private double maxObstacleInterval = 1000;  //  distance
 
     final public static double maxJumpingPower = 1500;     //  Increased Y velocity
 
@@ -54,6 +56,12 @@ public class GameEngine {
     private Group cloudGroup;
     private Group sceneGroup;
 
+    private double minGroundGapLength = 50;
+    private int groundGapLengthVariation = 200;
+    private double groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+
+    private double obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
+
 
     public GameEngine(Scene scene, SceneController sceneController, GameCharacter gameCharacter) {
         this.scene = scene;
@@ -64,14 +72,13 @@ public class GameEngine {
 
         cloudGroup = sceneController.getCloudGroup();
         sceneGroup = sceneController.getSceneGroup();
+
     }
 
     public void setup() {
         lastSceneUpdateTime = System.nanoTime();
         lastObstacleGeneratingDistance = 0;
         cumulativeSceneDistance = 0;
-        minObstacleInterval = 300;
-        maxObstacleInterval = 1000;
         sceneSpeed = defaultSceneSpeed;
 
         pressHandler = new EventHandler<KeyEvent>() {
@@ -151,11 +158,23 @@ public class GameEngine {
 
                 lastSceneUpdateTime = now;
 
-                if (cumulativeSceneDistance - lastObstacleGeneratingDistance >
-                        minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval))) {
+                Ground ground = sceneController.getLastGroundObject();
+//                System.out.println(ground.getLength() - Main.SCENE_WIDTH + sceneGroup.getTranslateX());
+//                System.out.println(sceneGroup.getTranslateX());
+
+                double groundGap = ground.getGap(sceneGroup.getTranslateX());
+                System.out.println("gap: " + groundGap);
+                if (groundGap > groundGapLength) {
+                    Ground newGround = sceneController.drawGround(Main.SCENE_WIDTH, rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
+                    newGround.setTranslateX(Math.abs(sceneGroup.getTranslateX()));
+                    groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+                }
+
+                if (cumulativeSceneDistance - lastObstacleGeneratingDistance > obstacleGapLength && groundGap < -100) {
                     sceneController.generateObstacle();
                     //System.out.println(obstacleQueue.size());
                     lastObstacleGeneratingDistance = cumulativeSceneDistance;
+                    obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
                 }
             }
         }.start();
@@ -214,4 +233,8 @@ public class GameEngine {
     }
 
     public long timeNow() { return System.nanoTime(); }
+
+    public double getCumulativeSceneDistance() {
+        return cumulativeSceneDistance;
+    }
 }

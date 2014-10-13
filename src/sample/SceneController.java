@@ -26,6 +26,8 @@ public class SceneController {
     private int numberOfObstacleTypes = obstacleTypes.length;
     private Random rand = new Random();
 
+    private Ground lastGroundObject;
+
     private double clearThreshold = 100;    // distance. Used to clear the objects out of the scene
 
     final private static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
@@ -107,7 +109,7 @@ public class SceneController {
 
     void generateInitialScene() {
         Random random = new Random();
-        drawGround(Color.BLACK);
+        drawGround(0, 1500, Color.BLACK); //rand.nextInt(1000) + Ground.minGroundLength
     }
 
     Shape drawCircleObstacle(double x, double y, double r, Color color) {
@@ -118,10 +120,12 @@ public class SceneController {
         return circle;
     }
 
-    void drawGround(Color color) {
-        Ground newGround = new Ground(20000);
+    Ground drawGround(double posX, double length, Color color) {
+        Ground newGround = new Ground(posX, length, sceneGroup.getTranslateX());
         sceneGroup.getChildren().add(newGround);
         groundQueue.add(newGround);
+        lastGroundObject = newGround;
+        return newGround;
     }
 
     /*Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
@@ -174,4 +178,6 @@ public class SceneController {
     public Group getSceneGroup() {
         return this.sceneGroup;
     }
+
+    public Ground getLastGroundObject() { return lastGroundObject; }
 }
