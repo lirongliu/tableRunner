@@ -139,7 +139,7 @@ public class GameEngine {
                 sceneGroup.setTranslateX(-cumulativeSceneDistance);
 
                 double characterOffset = gameCharacter.getTranslateX() + sceneGroup.getTranslateX();
-                
+
                 if(characterOffset > 512) {
                     cumulativeSceneDistance += characterOffset - 512;
                 }
