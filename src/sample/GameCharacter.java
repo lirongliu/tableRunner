@@ -5,6 +5,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 
+import java.util.Queue;
+
 /**
  * Created by lirong on 10/1/14.
  */
@@ -93,8 +95,12 @@ public class GameCharacter extends GameObject {
         this.getChildren().add(body);
     }
 
+    public void die() {
+        System.out.println("DIE");
+    }
+
     public void accelerate(double aX, double aY) {
-        if (jumping) return;
+        //if (jumping) return;
         velocityX += aX;
         velocityY += aY;
         speedWhenLastAccelerate = velocityX;
@@ -177,7 +183,7 @@ public class GameCharacter extends GameObject {
     public void land(double y) {
         jumping = false;
         velocityY = 0;
-        this.setTranslateY(0);
+        this.setTranslateY(y);
     }
 
     public double getSpeedDecreaseRatio() {
@@ -220,11 +226,11 @@ public class GameCharacter extends GameObject {
     }
 
     public void kick() {
-        System.out.println("kick");
+        System.out.println("kick in GameCharacter.java");
     }
 
     public void collideForward() {
-        velocityX = GameEngine.getSceneSpeed();
+        velocityX = 0; //GameEngine.getSceneSpeed();
     }
 
     public void collideDownward(double y) {

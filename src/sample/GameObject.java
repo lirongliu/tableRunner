@@ -24,4 +24,6 @@ public abstract class GameObject extends Group {
     abstract void move();
 
     abstract void updateSpeed();
+
+    abstract void die();
 }

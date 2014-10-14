@@ -56,8 +56,8 @@ public class SceneController {
     }
 
     void generateObstacle() {
-        //String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
-        //if (obstacleType.equals("Rectangle")) {
+        String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
+        if (obstacleType.equals("Rectangle")) {
             RectangleObstacle rec = new RectangleObstacle(
                                             RectangleObstacle.minObstacleWidth +
                                                 rand.nextInt(
@@ -73,25 +73,29 @@ public class SceneController {
             rec.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
             sceneGroup.getChildren().add(rec);
             obstacleQueue.add(rec);
-        /*} else if (obstacleType.equals("Thorn")) {
-            drawThornObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene,
-                    0,
+        } else if (obstacleType.equals("Thorn")) {
+            ThornObstacle thornObstacle = new ThornObstacle(
                     ThornObstacle.minObstacleWidth +
                             rand.nextInt(
                                     ThornObstacle.maxObstacleWidth -
-                                    ThornObstacle.minObstacleWidth + 1
+                                            ThornObstacle.minObstacleWidth + 1
                             ),
                     ThornObstacle.minObstacleHeight +
                             rand.nextInt(
                                     ThornObstacle.maxObstacleHeight -
-                                    ThornObstacle.minObstacleHeight + 1
+                                            ThornObstacle.minObstacleHeight + 1
                             ),
-                    rand.nextInt(ThornObstacle.maxThornCountInARow) + 1,
-                    Color.BLACK
+                    rand.nextInt(ThornObstacle.maxThornCountInARow) + ThornObstacle.minThornCountInARow
             );
+            thornObstacle.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup.getChildren().add(thornObstacle);
+            obstacleQueue.add(thornObstacle);
         } else if (obstacleType.equals("Circle")) {
-            drawCircleObstacle(Main.SCENE_WIDTH + newObstaclePositionOffsetToScene, 0, 20, Color.BLACK);
-        }*/
+            CircleObstacle circleObstacle = new CircleObstacle();
+            circleObstacle.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup.getChildren().add(circleObstacle);
+            obstacleQueue.add(circleObstacle);
+        }
     }
 
     GameCharacter generateCharacter() {
@@ -111,14 +115,15 @@ public class SceneController {
         drawGround(0, 1500, Color.BLACK); //rand.nextInt(1000) + Ground.minGroundLength
     }
 
-    Shape drawCircleObstacle(double x, double y, double r, Color color) {
-        Circle circle = new Circle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - r, r);
-        circle.setFill(color);
-        root.getChildren().add(circle);
-        //obstacleQueue.add(new CircleObstacle(circle));
-        return circle;
-    }
+//    Shape drawCircleObstacle(double x, double y, double r, Color color) {
+//        Circle circle = new Circle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - r, r);
+//        circle.setFill(color);
+//        root.getChildren().add(circle);
+//        //obstacleQueue.add(new CircleObstacle(circle));
+//        return circle;
+//    }
 
+    // posX: screen position
     Ground drawGround(double posX, double length, Color color) {
         Ground newGround = new Ground(posX, length, sceneGroup.getTranslateX());
         sceneGroup.getChildren().add(newGround);
@@ -127,45 +132,50 @@ public class SceneController {
         return newGround;
     }
 
-    /*Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
-        root.getChildren().add(rec);
-        obstacleQueue.add(new RectangleObstacle(rec));
-        return rec;
-    }*/
+//    Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
+//        root.getChildren().add(rec);
+//        obstacleQueue.add(new RectangleObstacle(rec));
+//        return rec;
+//    }
 
-    void drawThornObstacle(double x, double y, double w, double h, int count, Color color) {
-        for (int i = 0;i < count;i++) {
-            Polygon triangle = new Polygon();
-            triangle.getPoints().addAll(new Double[]{
-                            x + i * w / count, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y,
-                            x + (i + 1) * w / count, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y,
-                            x + (2 * i + 1) * w / count / 2, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - h }
-            );
-            triangle.setFill(color);
-            root.getChildren().add(triangle);
-            obstacleQueue.add(new ThornObstacle(triangle));
-        }
-    }
+//    void drawThornObstacle(double x, double y, double w, double h, int count, Color color) {
+//        for (int i = 0;i < count;i++) {
+//            Polygon triangle = new Polygon();
+//            triangle.getPoints().addAll(new Double[]{
+//                            x + i * w / count, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y,
+//                            x + (i + 1) * w / count, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y,
+//                            x + (2 * i + 1) * w / count / 2, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - h }
+//            );
+//            triangle.setFill(color);
+//            root.getChildren().add(triangle);
+//            obstacleQueue.add(new ThornObstacle(triangle));
+//        }
+//    }
 
 
     void clearOutdatedObstacles() {
         Iterator<Obstacle> iter = obstacleQueue.iterator();
         while (iter.hasNext()) {
             Group obstacle = iter.next();
-            Bounds bounds = obstacle.getLayoutBounds();
-            double translateX = obstacle.getTranslateX();
-            double translateY = obstacle.getTranslateY();
-            if (bounds.getMaxX() + translateX < -clearThreshold) {
-                sceneGroup.getChildren().remove(iter);
+            Bounds bounds = obstacle.getBoundsInParent();
+            double minX = bounds.getMinX() + sceneGroup.getTranslateX();
+            double maxX = bounds.getMaxX() + sceneGroup.getTranslateX();
+            double minY = bounds.getMinY() + sceneGroup.getTranslateY();
+            double maxY = bounds.getMaxY() + sceneGroup.getTranslateY();
+//            Bounds bounds = obstacle.getLayoutBounds();
+//            double translateX = obstacle.getTranslateX();
+//            double translateY = obstacle.getTranslateY();
+            if (maxX < -clearThreshold) {
+                sceneGroup.getChildren().remove(obstacle);
                 iter.remove();
-            } else if (bounds.getMaxY() + translateY < -clearThreshold) {
-                sceneGroup.getChildren().remove(iter);
+            } else if (maxY < -clearThreshold) {
+                sceneGroup.getChildren().remove(obstacle);
                 iter.remove();
-            } else if (bounds.getMinX() + translateX > Main.SCENE_WIDTH + clearThreshold) {
-                sceneGroup.getChildren().remove(iter);
+            } else if (minX > Main.SCENE_WIDTH + clearThreshold) {
+                sceneGroup.getChildren().remove(obstacle);
                 iter.remove();
-            }else if (bounds.getMinY() + translateY > Main.SCENE_HEIGHT + clearThreshold) {
-                sceneGroup.getChildren().remove(iter);
+            }else if (minY > Main.SCENE_HEIGHT + clearThreshold) {
+                sceneGroup.getChildren().remove(obstacle);
                 iter.remove();
             }
         }

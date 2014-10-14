@@ -14,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.shape.Shape;
 
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.Random;
 
@@ -91,7 +92,7 @@ public class GameEngine {
                     lastJumpPressTime = timeNow();
                     jumpKeyRelease = false;
                 } else if (keyEvent.getCode() == KeyCode.K) {
-                    //  TODO: implement kicking
+                    kick();
                 }
             }
         };
@@ -137,8 +138,7 @@ public class GameEngine {
                     jumpKeyRelease = true;
                     lastJumpPressTime = now;
                 }
-                updateGroundCollision();
-                updateObstacleCollision();
+                updateCollision();
                 updateObstaclesAndGround();
                 updateGameCharacter();
 
@@ -160,19 +160,15 @@ public class GameEngine {
                 lastSceneUpdateTime = now;
 
                 Ground ground = sceneController.getLastGroundObject();
-//                System.out.println(ground.getLength() - Main.SCENE_WIDTH + sceneGroup.getTranslateX());
-//                System.out.println(sceneGroup.getTranslateX());
 
                 double groundGap = ground.getGap(sceneGroup.getTranslateX());
                 if (groundGap > groundGapLength) {
-                    Ground newGround = sceneController.drawGround(Main.SCENE_WIDTH, rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
-                    newGround.setTranslateX(Math.abs(sceneGroup.getTranslateX()));
+                    sceneController.drawGround(Main.SCENE_WIDTH - sceneGroup.getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
                     groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
                 }
 
                 if (cumulativeSceneDistance - lastObstacleGeneratingDistance > obstacleGapLength && groundGap < -100) {
                     sceneController.generateObstacle();
-                    //System.out.println(obstacleQueue.size());
                     lastObstacleGeneratingDistance = cumulativeSceneDistance;
                     obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
                 }
@@ -180,83 +176,76 @@ public class GameEngine {
         }.start();
     }
 
-    void updateObstacleCollision() {
-        for (Obstacle obstacle : obstacleQueue) {
-            // next gc positionn
-            double gcPosMinX = gameCharacter.getBoundsInParent().getMinX() - sceneGroup.getTranslateX();
-            double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX() - sceneGroup.getTranslateX();
-            double gcPosMinY = gameCharacter.getBoundsInParent().getMinY() - sceneGroup.getTranslateY();
-            double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY() - sceneGroup.getTranslateY();
-            double obstacleMinX = obstacle.getBoundsInParent().getMinX();
-            double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
-            double obstacleMinY = obstacle.getBoundsInParent().getMinY();
-            double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
+    void updateObstacleCollision(Obstacle obstacle) {
+        double gcPosMinX = gameCharacter.getBoundsInParent().getMinX();
+        double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX();
+        double gcPosMinY = gameCharacter.getBoundsInParent().getMinY();
+        double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY();
+        double obstacleMinX = obstacle.getBoundsInParent().getMinX();
+        double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
+        double obstacleMinY = obstacle.getBoundsInParent().getMinY();
+        double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
 
-            // p ----- q     r ----- s
-            // if ((q - p) * (r - q) * (s - r) > 0) ==> not intersect
-            // if ((q - p) * (r - q) * (s - r) <= 0) ==> intersect
+        // p ----- q     r ----- s
+        // if ((q - p) * (r - q) * (s - r) > 0) ==> not intersect
+        // if ((q - p) * (r - q) * (s - r) <= 0) ==> intersect
 
-            double px, qx, rx, sx;
-            double py, qy, ry, sy;
-            if (gcPosMinX < obstacleMinX) {
-                px = gcPosMinX + gameCharacter.getVelocityX();
-                qx = gcPosMaxX + gameCharacter.getVelocityX();
-                rx = obstacleMinX;
-                sx = obstacleMaxX;
-            } else {
-                rx = gcPosMinX + gameCharacter.getVelocityX();
-                sx = gcPosMaxX + gameCharacter.getVelocityX();
-                px = obstacleMinX;
-                qx = obstacleMaxX;
-            }
+        double px, qx, rx, sx;
+        double py, qy, ry, sy;
+        if (gcPosMinX < obstacleMinX) {
+            px = gcPosMinX + gameCharacter.getVelocityX();
+            qx = gcPosMaxX + gameCharacter.getVelocityX();
+            rx = obstacleMinX;
+            sx = obstacleMaxX;
+        } else {
+            rx = gcPosMinX + gameCharacter.getVelocityX();
+            sx = gcPosMaxX + gameCharacter.getVelocityX();
+            px = obstacleMinX;
+            qx = obstacleMaxX;
+        }
 
-            if (gcPosMinY < obstacleMinY) {
-                py = gcPosMinY + gameCharacter.getVelocityY();
-                qy = gcPosMaxY + gameCharacter.getVelocityY();
-                ry = obstacleMinY;
-                sy = obstacleMaxY;
-            } else {
-                ry = gcPosMinY + gameCharacter.getVelocityY();
-                sy = gcPosMaxY + gameCharacter.getVelocityY();
-                py = obstacleMinY;
-                qy = obstacleMaxY;
-            }
+        if (gcPosMinY < obstacleMinY) {
+            py = gcPosMinY + gameCharacter.getVelocityY();
+            qy = gcPosMaxY + gameCharacter.getVelocityY();
+            ry = obstacleMinY;
+            sy = obstacleMaxY;
+        } else {
+            ry = gcPosMinY + gameCharacter.getVelocityY();
+            sy = gcPosMaxY + gameCharacter.getVelocityY();
+            py = obstacleMinY;
+            qy = obstacleMaxY;
+        }
 
 //            System.out.println("(qx - px) * (rx - qx) * (sx - rx): " + (qx - px) * (rx - qx) * (sx - rx));
 //            System.out.println("(qy - py) * (ry - qy) * (sy - ry): " + (qy - py) * (ry - qy) * (sy - ry));
 
-            if ((qx - px) * (rx - qx) * (sx - rx) <= 0 && (qy - py) * (ry - qy) * (sy - ry) <= 0) {
-                System.out.println("Intersect");
-                if (gcPosMaxX < obstacleMinX) {
+        if ((qx - px) * (rx - qx) * (sx - rx) <= 0 && (qy - py) * (ry - qy) * (sy - ry) <= 0) {
+            if ((obstacle instanceof Ground) || (obstacle instanceof RectangleObstacle)) {
+                if (gcPosMaxX <= obstacleMinX) {
                     gameCharacter.collideForward();
-                } else if (gcPosMaxY < obstacleMinY) {
+                } else if (gcPosMaxY >= obstacleMinY) {
                     gameCharacter.collideDownward(obstacleMinY);
                 }
+            } else if (obstacle instanceof CircleObstacle) {
+                if (gcPosMaxX <= obstacleMinX) {
+                    gameCharacter.die();
+                } else if (gcPosMaxY >= obstacleMinY) {
+                    gameCharacter.collideDownward(obstacleMinY);
+                }
+            } else if (obstacle instanceof ThornObstacle) {
+                gameCharacter.die();
             }
         }
     }
 
-    // TODO: make sure it's correct
-    void updateGroundCollision() {
-
-        if(gameCharacter.velocityY + gameCharacter.getTranslateY() > Main.SCENE_HEIGHT - Main.GROUND_HEIGHT) {
-            gameCharacter.land(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
+    void updateCollision() {
+        for (Obstacle obstacle : obstacleQueue) {
+            updateObstacleCollision(obstacle);
         }
 
-        /*//Shape gc = gameCharacter.getShapeObject();
-        GameCharacter gc = gameCharacter;
-
-        Bounds gcBounds = gc.localToParent(gc.getLayoutBounds());
-        double maxY = gcBounds.getMaxY();
-        double centerX = gcBounds.getMaxX() + GameCharacter.radius;
-        for (Ground ground : groundQueue) {
-            Bounds groundBounds = ground.getShapeObject().localToParent(ground.getShapeObject().getLayoutBounds());
-            if (centerX > groundBounds.getMinX() &&
-                centerX < groundBounds.getMaxX() &&
-                    maxY + gameCharacter.velocityY > groundBounds.getMinY()) {
-                gameCharacter.land();
-            }
-        }*/
+        for (Obstacle ground : groundQueue) {
+            updateObstacleCollision(ground);
+        }
     }
 
     void updateGameCharacter() {
@@ -292,5 +281,36 @@ public class GameEngine {
 
     public double getCumulativeSceneDistance() {
         return cumulativeSceneDistance;
+    }
+
+    public void kick() {
+        System.out.println("kick in GameEngine");
+        double gcPosMinX = gameCharacter.getBoundsInParent().getMinX();
+        double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX();
+        double gcPosMinY = gameCharacter.getBoundsInParent().getMinY();
+        double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY();
+        Iterator<Obstacle> iter = obstacleQueue.iterator();
+        Obstacle obstacleToRemove = null;
+        while (iter.hasNext()) {
+            Obstacle obstacle = iter.next();
+            if (obstacle instanceof RectangleObstacle) {
+                double obstacleMinX = obstacle.getBoundsInParent().getMinX();
+                double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
+                double obstacleMinY = obstacle.getBoundsInParent().getMinY();
+                double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
+                System.out.println("gcPosMaxX: " + gcPosMaxX);
+                System.out.println("gcPosMaxY: " + gcPosMaxY);
+                System.out.println("obstacleMinX: " + obstacleMinX);
+                System.out.println("obstacleMaxY: " + obstacleMaxY);
+                if (gcPosMaxX > obstacleMinX + 3) return;
+                if (gcPosMaxY < -3) return;
+                if (obstacleMaxY < -3) return;
+                if (obstacleMinX - gcPosMaxX <= 10) {
+                    obstacle.die();
+                    iter.remove();
+                    break;
+                }
+            }
+        }
     }
 }

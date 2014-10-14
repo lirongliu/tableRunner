@@ -19,7 +19,7 @@ public class Obstacle extends GameObject {
 
     public Obstacle(/*Shape obj,*/ double vx, double vy) {
         //this.obj = obj;
-        this.velocityX = vx + GameEngine.getSceneSpeed();
+        this.velocityX = vx;
         this.velocityY = vy;
         //System.out.println("Circle Speed: " + velocityX);
     }
@@ -34,5 +34,9 @@ public class Obstacle extends GameObject {
         setTranslateX(getTranslateX() + velocityX);
         setTranslateY(getTranslateY() + velocityY);
         updateSpeed();
+    }
+
+    public void die() {
+
     }
 }

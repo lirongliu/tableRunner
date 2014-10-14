@@ -13,6 +13,10 @@ import java.io.PrintStream;
 import java.util.Queue;
 import java.util.Random;
 
+
+// TODO: (FIX ME) When falling from an object, gc can still jump.
+// TODO: Refactor kick()
+// TODO: (Debug) kicking sometimes doesn't work
 public class Main extends Application {
     private static PrintStream p = System.out;
 
