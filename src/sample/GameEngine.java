@@ -141,6 +141,20 @@ public class GameEngine {
                 updateObstacleCollision();
                 updateObstaclesAndGround();
                 updateGameCharacter();
+
+                // Now update the scene position
+                cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
+                sceneGroup.setTranslateX(-cumulativeSceneDistance);
+
+                double characterOffset = gameCharacter.getTranslateX() + sceneGroup.getTranslateX();
+
+                if(characterOffset > 512) {
+                    cumulativeSceneDistance += characterOffset - 512;
+                }
+
+                cumulativeSceneDistance += Math.abs(sceneSpeed);
+
+
                 sceneController.clearOutdatedObstacles();
 
                 lastSceneUpdateTime = now;
@@ -256,11 +270,6 @@ public class GameEngine {
         for (Obstacle obj : groundQueue) {
             obj.move();
         }
-
-        cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
-        sceneGroup.setTranslateX(-cumulativeSceneDistance);
-
-        cumulativeSceneDistance += Math.abs(sceneSpeed);
     }
 
     public EventHandler<KeyEvent> getPressHandler() {

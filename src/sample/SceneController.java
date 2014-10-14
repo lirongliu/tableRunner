@@ -16,7 +16,6 @@ import java.util.Random;
  * Created by lirong on 10/3/14.
  */
 
-// TODO: Add more static scene on the sky
 // TODO: Add gap obstacles (could be tricky because there should be no obstacle between the gap)
 public class SceneController {
     Group root;
@@ -99,10 +98,10 @@ public class SceneController {
         int originalX = Main.SCENE_WIDTH / 3;
 
         GameCharacter gameCharacter = new GameCharacter();
-        root.getChildren().add(gameCharacter);
+        sceneGroup.getChildren().add(gameCharacter);
 
         gameCharacter.setTranslateX(originalX);
-        gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
+        //gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
 
         return gameCharacter;
     }
@@ -153,14 +152,22 @@ public class SceneController {
         Iterator<Obstacle> iter = obstacleQueue.iterator();
         while (iter.hasNext()) {
             Group obstacle = iter.next();
-            Bounds bounds = obstacle.getBoundsInParent();
-            double translateX = sceneGroup.getTranslateX();
-            double translateY = sceneGroup.getTranslateY();
-
-            if (bounds.getMaxX() + translateX < -clearThreshold) iter.remove();
-            else if (bounds.getMaxY() + translateY < -clearThreshold) iter.remove();
-            else if (bounds.getMinX() + translateX > Main.SCENE_WIDTH + clearThreshold) iter.remove();
-            else if (bounds.getMinY() + translateY > Main.SCENE_HEIGHT + clearThreshold) iter.remove();
+            Bounds bounds = obstacle.getLayoutBounds();
+            double translateX = obstacle.getTranslateX();
+            double translateY = obstacle.getTranslateY();
+            if (bounds.getMaxX() + translateX < -clearThreshold) {
+                sceneGroup.getChildren().remove(iter);
+                iter.remove();
+            } else if (bounds.getMaxY() + translateY < -clearThreshold) {
+                sceneGroup.getChildren().remove(iter);
+                iter.remove();
+            } else if (bounds.getMinX() + translateX > Main.SCENE_WIDTH + clearThreshold) {
+                sceneGroup.getChildren().remove(iter);
+                iter.remove();
+            }else if (bounds.getMinY() + translateY > Main.SCENE_HEIGHT + clearThreshold) {
+                sceneGroup.getChildren().remove(iter);
+                iter.remove();
+            }
         }
     }
 

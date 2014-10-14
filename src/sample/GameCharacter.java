@@ -42,7 +42,7 @@ public class GameCharacter extends GameObject {
     private int state;
 
     public GameCharacter() {
-        velocityX = GameEngine.getSceneSpeed();
+        velocityX = 0.0;
         velocityY = 0.0;
         jumping = false;
 
@@ -112,8 +112,8 @@ public class GameCharacter extends GameObject {
         if (!jumping) {
             velocityX -= getSpeedDecreaseRatio() * speedWhenLastAccelerate;
         }
-        velocityX -= dampingRatio * (velocityX - GameEngine.defaultSceneSpeed);
-        velocityX = (velocityX - GameEngine.defaultSceneSpeed < 0.01) ? GameEngine.defaultSceneSpeed : velocityX;
+        velocityX -= dampingRatio * velocityX;
+        velocityX = (velocityX < 0.01) ? 0.0 : velocityX;
         velocityY = velocityY + GameEngine.gravity;
     }
 
@@ -149,18 +149,19 @@ public class GameCharacter extends GameObject {
 
 
         double vertOffset = body.getBoundsInLocal().getMaxY();
-        //System.out.println("vert " + vertOffset);
+
         body.setTranslateY(-vertOffset);
 
 
        // System.out.println("pos: " + getPositionX());
-        if (getTranslateX() > 512 && velocityX > 0) {
+        /*if (getTranslateX() > 512 && velocityX > 0) {
             GameEngine.updateSceneSpeed(-velocityX + GameEngine.defaultSceneSpeed);
             //System.out.println("pass mid point");
         } else {
             this.setTranslateX(this.getTranslateX() + velocityX);
             GameEngine.updateSceneSpeed(GameEngine.defaultSceneSpeed);
-        }
+        }*/
+        this.setTranslateX(this.getTranslateX() + velocityX);
         this.setTranslateY(this.getTranslateY() + velocityY);
         updateSpeed();
     }
@@ -176,7 +177,7 @@ public class GameCharacter extends GameObject {
     public void land(double y) {
         jumping = false;
         velocityY = 0;
-        this.setTranslateY(y);
+        this.setTranslateY(0);
     }
 
     public double getSpeedDecreaseRatio() {

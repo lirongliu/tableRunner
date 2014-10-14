@@ -2,7 +2,6 @@
   <library name="jssc">
     <CLASSES>
       <root url="jar:///Library/Java/Extensions/jssc.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../jSSC-2.8.0-Release/jssc.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
