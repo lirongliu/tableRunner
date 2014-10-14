@@ -32,4 +32,6 @@ public abstract class GameObject extends Group {
     abstract void updateSpeed();
 
     abstract void die();
+
+    abstract GameObject getDeepCopy();
 }

@@ -52,4 +52,10 @@ public class CircleObstacle extends Obstacle {
     public void rotate() {
 
     }
+
+    @Override
+    public CircleObstacle getDeepCopy() {
+        System.out.println("circle deep copy");
+        return new CircleObstacle();
+    }
 }

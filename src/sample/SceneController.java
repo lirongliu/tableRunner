@@ -29,7 +29,7 @@ public class SceneController {
 
     private double clearThreshold = 100;    // distance. Used to clear the objects out of the scene
 
-    final private static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
+    final public static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
 
 
     private Group[] cloudGroup;
@@ -76,7 +76,7 @@ public class SceneController {
 
     }
 
-    void generateObstacle(int i) {
+    public Obstacle generateObstacle(int i) {
         System.out.println("generating an obstacle");
         String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
         if (obstacleType.equals("Rectangle")) {
@@ -96,6 +96,7 @@ public class SceneController {
             rec.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
             sceneGroup[i].getChildren().add(rec);
             obstacleQueue[i].add(rec);
+            return rec;
         } else if (obstacleType.equals("Thorn")) {
             System.out.println("Thorn");
             ThornObstacle thornObstacle = new ThornObstacle(
@@ -114,12 +115,16 @@ public class SceneController {
             thornObstacle.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
             sceneGroup[i].getChildren().add(thornObstacle);
             obstacleQueue[i].add(thornObstacle);
+            return thornObstacle;
         } else if (obstacleType.equals("Circle")) {
             System.out.println("Circle");
             CircleObstacle circleObstacle = new CircleObstacle();
             circleObstacle.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
             sceneGroup[i].getChildren().add(circleObstacle);
             obstacleQueue[i].add(circleObstacle);
+            return circleObstacle;
+        } else {
+            return null;
         }
     }
 
@@ -140,7 +145,7 @@ public class SceneController {
 
     void generateInitialScene(int i) {
         Random random = new Random();
-        drawGround(i, 0, 1500, Color.BLACK); //rand.nextInt(1000) + Ground.minGroundLength
+        drawGround(i, 0, 1500); //rand.nextInt(1000) + Ground.minGroundLength
     }
 
 //    Shape drawCircleObstacle(double x, double y, double r, Color color) {
@@ -152,8 +157,8 @@ public class SceneController {
 //    }
 
     // posX: screen position
-    Ground drawGround(int i, double posX, double length, Color color) {
-        Ground newGround = new Ground(posX, length, sceneGroup[i].getTranslateX());
+    Ground drawGround(int i, double posX, double length) {
+        Ground newGround = new Ground(posX, length);
         sceneGroup[i].getChildren().add(newGround);
         obstacleQueue[i].add(newGround);
         lastGroundObject[i] = newGround;
@@ -226,4 +231,6 @@ public class SceneController {
     }
 
     public Ground getLastGroundObject(int i) { return lastGroundObject[i]; }
+
+    public void setLastGroundObject(int i, Ground lastGroundObject) { this.lastGroundObject[i] = lastGroundObject; }
 }

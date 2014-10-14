@@ -196,39 +196,62 @@ public class GameEngine {
                     sceneController.clearOutdatedObstacles(i);
 
 
-                    Ground ground = sceneController.getLastGroundObject(i);
-
-                    double groundGap = ground.getGap(sceneGroup[i].getTranslateX());
-                    if (groundGap > groundGapLength) {
-                        sceneController.drawGround(i, Main.SCENE_WIDTH - sceneGroup[i].getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
-                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
-                    }
-
-                    if (cumulativeSceneDistance[i] - lastObstacleGeneratingDistance[i] > obstacleGapLength && groundGap < -100) {
-                        sceneController.generateObstacle(i);
-                        lastObstacleGeneratingDistance[i] = cumulativeSceneDistance[i];
-                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
-                    }
-                }
-//                if (numOfPlayers == 2) {
-//                    int fasterPlayerIndex = cumulativeSceneDistance[1] - cumulativeSceneDistance[0] > 0 ? 1 : 0;
-//                    Ground ground = sceneController.getLastGroundObject(fasterPlayerIndex);
+//                    Ground ground = sceneController.getLastGroundObject(i);
 //
-//                    double groundGap = ground.getGap(sceneGroup[fasterPlayerIndex].getTranslateX());
+//                    double groundGap = ground.getGap(sceneGroup[i].getTranslateX());
 //                    if (groundGap > groundGapLength) {
-//                        Ground newGround = sceneController.drawGround(fasterPlayerIndex, Main.SCENE_WIDTH - sceneGroup[fasterPlayerIndex].getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
+//                        sceneController.drawGround(i, Main.SCENE_WIDTH - sceneGroup[i].getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
 //                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
-//
-//                        bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newGround));
 //                    }
 //
-//                    if (cumulativeSceneDistance[fasterPlayerIndex] - lastObstacleGeneratingDistance[fasterPlayerIndex] > obstacleGapLength && groundGap < -100) {
-//                        sceneController.generateObstacle(fasterPlayerIndex);
-//                        lastObstacleGeneratingDistance[fasterPlayerIndex] = cumulativeSceneDistance[fasterPlayerIndex];
+//                    if (cumulativeSceneDistance[i] - lastObstacleGeneratingDistance[i] > obstacleGapLength && groundGap < -100) {
+//                        sceneController.generateObstacle(i);
+//                        lastObstacleGeneratingDistance[i] = cumulativeSceneDistance[i];
 //                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
 //                    }
-//
-//                }
+                }
+                if (numOfPlayers == 2) {
+                    int fasterPlayerIndex = cumulativeSceneDistance[1] - cumulativeSceneDistance[0] > 0 ? 1 : 0;
+                    int slowerPlayerIndex = 1 - fasterPlayerIndex;
+                    Ground ground = sceneController.getLastGroundObject(fasterPlayerIndex);
+
+                    double groundGap = ground.getGap(sceneGroup[fasterPlayerIndex].getTranslateX());
+                    if (groundGap > groundGapLength) {
+                        Ground newGround = sceneController.drawGround(
+                                fasterPlayerIndex,
+                                Main.SCENE_WIDTH - sceneGroup[fasterPlayerIndex].getTranslateX(),
+                                rand.nextInt(2000) + Ground.minGroundLength);
+                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+
+                        bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newGround.getDeepCopy()));
+                    }
+
+                    if (cumulativeSceneDistance[fasterPlayerIndex] - lastObstacleGeneratingDistance[fasterPlayerIndex] > obstacleGapLength && groundGap < -100) {
+                        Obstacle newObstacle = sceneController.generateObstacle(fasterPlayerIndex);
+                        lastObstacleGeneratingDistance[fasterPlayerIndex] = cumulativeSceneDistance[fasterPlayerIndex];
+                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
+                        bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newObstacle.getDeepCopy()));
+                    }
+
+                    if (bufferedObstacles.isEmpty() == false) {
+                        if (cumulativeSceneDistance[slowerPlayerIndex] >= bufferedObstacles.peek().getKey()) {
+
+                            Obstacle firstObstacle = bufferedObstacles.peek().getValue();
+                            obstacleQueue[slowerPlayerIndex].add(firstObstacle);
+                            if (firstObstacle instanceof Ground) {
+                                sceneController.setLastGroundObject(slowerPlayerIndex, (Ground) firstObstacle);
+                            } else {
+                                firstObstacle.setTranslateX(Math.abs(sceneGroup[slowerPlayerIndex].getTranslateX()) + Main.SCENE_WIDTH + SceneController.newObstaclePositionOffsetToScene);
+                            }
+                            sceneGroup[slowerPlayerIndex].getChildren().add(firstObstacle);
+                            bufferedObstacles.remove();     //  remove the head of bufferedObstacles
+//                            System.out.println("post bufferedObstacles size: " + bufferedObstacles.size());
+                            System.out.println("bufferedObstacles size: " + bufferedObstacles.size());
+                            System.out.println("obstacleQueue[0] size: " + obstacleQueue[0].size());
+                            System.out.println("obstacleQueue[1] size: " + obstacleQueue[1].size());
+                        }
+                    }
+                }
                 lastSceneUpdateTime = now;
             }
         }.start();
@@ -322,9 +345,6 @@ public class GameEngine {
         for (Obstacle obj : obstacleQueue[i]) {
             obj.move();
         }
-//        for (Obstacle obj : groundQueue[i]) {
-//            obj.move();
-//        }
     }
 
     public EventHandler<KeyEvent> getPressHandler() {
@@ -353,16 +373,24 @@ public class GameEngine {
         System.out.println("kick in GameEngine");
         double gcMaxX = gameCharacter[i].getBoundsInParent().getMaxX();
         double gcMaxY = gameCharacter[i].getBoundsInParent().getMaxY();
+        double gcMinX = gameCharacter[i].getBoundsInParent().getMinX();
+        double gcMinY = gameCharacter[i].getBoundsInParent().getMinY();
         Iterator<Obstacle> iter = obstacleQueue[i].iterator();
         while (iter.hasNext()) {
             Obstacle obstacle = iter.next();
             if (obstacle instanceof RectangleObstacle) {
                 double obstacleMinX = obstacle.getBoundsInParent().getMinX();
                 double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
+                double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
+                double obstacleMinY = obstacle.getBoundsInParent().getMinY();
                 System.out.println("gcPosMaxX: " + gcMaxX);
                 System.out.println("gcPosMaxY: " + gcMaxY);
+                System.out.println("gcPosMinX: " + gcMinX);
+                System.out.println("gcPosMinY: " + gcMinY);
                 System.out.println("obstacleMinX: " + obstacleMinX);
                 System.out.println("obstacleMaxY: " + obstacleMaxY);
+                System.out.println("obstacleMaxX: " + obstacleMaxX);
+                System.out.println("obstacleMinY: " + obstacleMinY);
                 if (gcMaxX > obstacleMinX + 3) return;
                 if (gcMaxY < -3) return;
                 if (obstacleMaxY < -3) return;

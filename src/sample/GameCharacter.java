@@ -407,4 +407,9 @@ public class GameCharacter extends GameObject {
         }
         prevAction = action;
     }
+
+    @Override
+    public GameCharacter getDeepCopy() {
+        return new GameCharacter();
+    }
 }

@@ -15,7 +15,14 @@ public class ThornObstacle extends Obstacle {
     public static int maxThornCountInARow = 6;
     public static int minThornCountInARow = 2;
 
+    private double w, h;
+    private int count;
+
     public ThornObstacle(double w, double h, int count) {
+        super();
+        this.w = w;
+        this.h = h;
+        this.count = count;
         for (int i = 0;i < count;i++) {
             Polygon triangle = new Polygon();
             triangle.getPoints().addAll(new Double[]{
@@ -26,5 +33,11 @@ public class ThornObstacle extends Obstacle {
             triangle.setFill(Color.BLACK);
             getChildren().add(triangle);
         }
+    }
+
+    @Override
+    public ThornObstacle getDeepCopy() {
+        System.out.println("thorn deep copy");
+        return new ThornObstacle(w, h, count);
     }
 }
