@@ -10,7 +10,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.*;
-import javafx.scene.shape.Line;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.*;
 import javafx.scene.shape.Shape;
 
 import java.util.Queue;
@@ -137,7 +138,7 @@ public class GameEngine {
                     lastJumpPressTime = now;
                 }
                 updateGroundCollision();
-                //updateWithGroundCollision();
+                updateObstacleCollision();
                 updateObstaclesAndGround();
                 updateGameCharacter();
                 sceneController.clearOutdatedObstacles();
@@ -149,7 +150,6 @@ public class GameEngine {
 //                System.out.println(sceneGroup.getTranslateX());
 
                 double groundGap = ground.getGap(sceneGroup.getTranslateX());
-                System.out.println("gap: " + groundGap);
                 if (groundGap > groundGapLength) {
                     Ground newGround = sceneController.drawGround(Main.SCENE_WIDTH, rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
                     newGround.setTranslateX(Math.abs(sceneGroup.getTranslateX()));
@@ -166,11 +166,67 @@ public class GameEngine {
         }.start();
     }
 
+    void updateObstacleCollision() {
+        for (Obstacle obstacle : obstacleQueue) {
+            // next gc positionn
+            double gcPosMinX = gameCharacter.getBoundsInParent().getMinX() - sceneGroup.getTranslateX();
+            double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX() - sceneGroup.getTranslateX();
+            double gcPosMinY = gameCharacter.getBoundsInParent().getMinY() - sceneGroup.getTranslateY();
+            double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY() - sceneGroup.getTranslateY();
+            double obstacleMinX = obstacle.getBoundsInParent().getMinX();
+            double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
+            double obstacleMinY = obstacle.getBoundsInParent().getMinY();
+            double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
+
+            // p ----- q     r ----- s
+            // if ((q - p) * (r - q) * (s - r) > 0) ==> not intersect
+            // if ((q - p) * (r - q) * (s - r) <= 0) ==> intersect
+
+            double px, qx, rx, sx;
+            double py, qy, ry, sy;
+            if (gcPosMinX < obstacleMinX) {
+                px = gcPosMinX + gameCharacter.getVelocityX();
+                qx = gcPosMaxX + gameCharacter.getVelocityX();
+                rx = obstacleMinX;
+                sx = obstacleMaxX;
+            } else {
+                rx = gcPosMinX + gameCharacter.getVelocityX();
+                sx = gcPosMaxX + gameCharacter.getVelocityX();
+                px = obstacleMinX;
+                qx = obstacleMaxX;
+            }
+
+            if (gcPosMinY < obstacleMinY) {
+                py = gcPosMinY + gameCharacter.getVelocityY();
+                qy = gcPosMaxY + gameCharacter.getVelocityY();
+                ry = obstacleMinY;
+                sy = obstacleMaxY;
+            } else {
+                ry = gcPosMinY + gameCharacter.getVelocityY();
+                sy = gcPosMaxY + gameCharacter.getVelocityY();
+                py = obstacleMinY;
+                qy = obstacleMaxY;
+            }
+
+//            System.out.println("(qx - px) * (rx - qx) * (sx - rx): " + (qx - px) * (rx - qx) * (sx - rx));
+//            System.out.println("(qy - py) * (ry - qy) * (sy - ry): " + (qy - py) * (ry - qy) * (sy - ry));
+
+            if ((qx - px) * (rx - qx) * (sx - rx) <= 0 && (qy - py) * (ry - qy) * (sy - ry) <= 0) {
+                System.out.println("Intersect");
+                if (gcPosMaxX < obstacleMinX) {
+                    gameCharacter.collideForward();
+                } else if (gcPosMaxY < obstacleMinY) {
+                    gameCharacter.collideDownward(obstacleMinY);
+                }
+            }
+        }
+    }
+
     // TODO: make sure it's correct
     void updateGroundCollision() {
 
         if(gameCharacter.velocityY + gameCharacter.getTranslateY() > Main.SCENE_HEIGHT - Main.GROUND_HEIGHT) {
-            gameCharacter.land();
+            gameCharacter.land(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
         }
 
         /*//Shape gc = gameCharacter.getShapeObject();

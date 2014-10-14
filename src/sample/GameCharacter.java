@@ -173,10 +173,10 @@ public class GameCharacter extends GameObject {
         return !jumping;
     }
 
-    public void land() {
+    public void land(double y) {
         jumping = false;
         velocityY = 0;
-        this.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
+        this.setTranslateY(y);
     }
 
     public double getSpeedDecreaseRatio() {
@@ -220,6 +220,14 @@ public class GameCharacter extends GameObject {
 
     public void kick() {
         System.out.println("kick");
+    }
+
+    public void collideForward() {
+        velocityX = GameEngine.getSceneSpeed();
+    }
+
+    public void collideDownward(double y) {
+        land(y);
     }
 
     private void DFA(int action) {

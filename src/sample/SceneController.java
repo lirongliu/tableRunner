@@ -153,9 +153,10 @@ public class SceneController {
         Iterator<Obstacle> iter = obstacleQueue.iterator();
         while (iter.hasNext()) {
             Group obstacle = iter.next();
-            Bounds bounds = obstacle.getLayoutBounds();
-            double translateX = obstacle.getTranslateX();
-            double translateY = obstacle.getTranslateY();
+            Bounds bounds = obstacle.getBoundsInParent();
+            double translateX = sceneGroup.getTranslateX();
+            double translateY = sceneGroup.getTranslateY();
+
             if (bounds.getMaxX() + translateX < -clearThreshold) iter.remove();
             else if (bounds.getMaxY() + translateY < -clearThreshold) iter.remove();
             else if (bounds.getMinX() + translateX > Main.SCENE_WIDTH + clearThreshold) iter.remove();
