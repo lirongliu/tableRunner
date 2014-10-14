@@ -7,8 +7,10 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
@@ -20,23 +22,23 @@ public class GameEngine {
     final public static double gravity = 80.0 / fps;
     final public static double defaultSceneSpeed = -20.0 / fps;      //  x coordinate
 
-    private static double sceneSpeed;      //  x coordinate
+    private static double sceneSpeed[];      //  x coordinate
 
-    private GameCharacter gameCharacter;
+    private GameCharacter gameCharacter[];
     private SceneController sceneController;
     private Scene scene;
 
     private long lastSceneUpdateTime;
-    private double lastObstacleGeneratingDistance;  //  absolute value
-    private double cumulativeSceneDistance; //  absolute value
+    private double lastObstacleGeneratingDistance[];  //  absolute value
+    private double cumulativeSceneDistance[]; //  absolute value
     private double minObstacleInterval = 300;  //  distance
     private double maxObstacleInterval = 1000;  //  distance
 
     final public static double maxJumpingPower = 1500;     //  Increased Y velocity
 
     // Event handling variables
-    private long lastJumpPressTime;     //  Last time the jump button was pressed
-    private boolean jumpKeyRelease = true;
+    private long lastJumpPressTime[];     //  Last time the jump button was pressed
+    private boolean jumpKeyRelease[];
 
     private long maxJumpPressTime = (long)1e9 / 12;      //  If the press time exceeds this value, jump will be triggered automatically.
 
@@ -45,12 +47,13 @@ public class GameEngine {
     private EventHandler<KeyEvent> pressHandler;
     private EventHandler<KeyEvent> releaseHandler;
 
-    private Queue<Obstacle> obstacleQueue;
-    private Queue<Ground> groundQueue;
+    private Queue<Obstacle> obstacleQueue[];
+    //private Queue<Ground> groundQueue[];
+    private Queue<Pair<Double, Obstacle>> bufferedObstacles;
 
 
-    private Group cloudGroup;
-    private Group sceneGroup;
+    private Group cloudGroup[];
+    private Group sceneGroup[];
 
     private double minGroundGapLength = 50;
     private int groundGapLengthVariation = 200;
@@ -58,35 +61,68 @@ public class GameEngine {
 
     private double obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
 
+    private int numOfPlayers;
 
-    public GameEngine(Scene scene, SceneController sceneController, GameCharacter gameCharacter) {
+
+
+
+    public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers) {
+        lastJumpPressTime = new long[numOfPlayers];
+        jumpKeyRelease = new boolean[numOfPlayers];
+        for (int i = 0;i < numOfPlayers;i++) {
+            jumpKeyRelease[i] = true;
+        }
+        lastObstacleGeneratingDistance = new double[numOfPlayers];
+        cumulativeSceneDistance = new double[numOfPlayers];
+        sceneSpeed = new double[numOfPlayers];
+
+        bufferedObstacles = new LinkedList<Pair<Double, Obstacle>>();
+        obstacleQueue = new LinkedList[numOfPlayers];
+        //groundQueue = new LinkedList[numOfPlayers];
+        this.gameCharacter = new GameCharacter[numOfPlayers];
+        this.cloudGroup = new Group[numOfPlayers];
+        this.sceneGroup = new Group[numOfPlayers];
+        this.numOfPlayers = numOfPlayers;
         this.scene = scene;
-        this.gameCharacter = gameCharacter;
         this.sceneController = sceneController;
-        obstacleQueue = sceneController.getObstacleQueue();
-        groundQueue = sceneController.getGroundQueue();
 
-        cloudGroup = sceneController.getCloudGroup();
-        sceneGroup = sceneController.getSceneGroup();
-
+        for (int i = 0;i < numOfPlayers;i++) {
+            this.gameCharacter[i] = gameCharacter[i];
+            obstacleQueue[i] = sceneController.getObstacleQueue(i);
+            //groundQueue[i] = sceneController.getGroundQueue(i);
+            cloudGroup[i] = sceneController.getCloudGroup(i);
+            sceneGroup[i] = sceneController.getSceneGroup(i);
+        }
     }
 
     public void setup() {
-        lastSceneUpdateTime = System.nanoTime();
-        lastObstacleGeneratingDistance = 0;
-        cumulativeSceneDistance = 0;
-        sceneSpeed = defaultSceneSpeed;
+        for (int i = 0;i < numOfPlayers;i++) {
+            lastSceneUpdateTime = System.nanoTime();
+            lastObstacleGeneratingDistance[i] = 0;
+            cumulativeSceneDistance[i] = 0;
+            sceneSpeed[i] = defaultSceneSpeed;
+        }
 
         pressHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 keyEvent.consume();
-                if (!jumpKeyRelease) return;
-                if (keyEvent.getCode() == KeyCode.SPACE) {
-                    lastJumpPressTime = timeNow();
-                    jumpKeyRelease = false;
-                } else if (keyEvent.getCode() == KeyCode.K) {
-                    kick();
+                if (keyEvent.getCode() == KeyCode.SPACE) {  //  player 1 jumpKeyRelease
+                    if (!jumpKeyRelease[0]) return;
+                    lastJumpPressTime[0] = timeNow();
+                    jumpKeyRelease[0] = false;
+                } else if (keyEvent.getCode() == KeyCode.K) {   // player 1 kicks
+                    if (!jumpKeyRelease[0]) return;
+                    kick(0);
+                } else if (keyEvent.getCode() == KeyCode.Q) {   //  player 2 jumpKeyRelease
+                    if (numOfPlayers < 2) return;
+                    if (!jumpKeyRelease[1]) return;
+                    lastJumpPressTime[1] = timeNow();
+                    jumpKeyRelease[1] = false;
+                } else if (keyEvent.getCode() == KeyCode.A) {   //  player 2 kicks
+                    if (numOfPlayers < 2) return;
+                    if (!jumpKeyRelease[1]) return;
+                    kick(1);
                 }
             }
         };
@@ -95,23 +131,30 @@ public class GameEngine {
             @Override
             public void handle(KeyEvent keyEvent) {
                 long now = timeNow();
-                if (keyEvent.getCode() == KeyCode.SPACE) {     //  jump
+                if (keyEvent.getCode() == KeyCode.SPACE) {     //  Player 1 jumps
                     double power;
-                    long totalJumpPressTime = now - lastJumpPressTime;
+                    long totalJumpPressTime = now - lastJumpPressTime[0];
 
                     // TODO: do it better
                     power = Math.min(maxJumpingPower, (double)totalJumpPressTime / maxJumpPressTime * maxJumpingPower);
 
-                    gameCharacter.jump(power);
-                    jumpKeyRelease = true;
+                    gameCharacter[0].jump(power);
+                    jumpKeyRelease[0] = true;
 
-                } else if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.DOWN) {   //  accelerate
-                    gameCharacter.accelerate(100 / fps, 0);
-                } else if (keyEvent.getCode() == KeyCode.P) {
+                } else if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.DOWN) {   // Player 1 accelerates
+                    gameCharacter[0].accelerate(100 / fps, 0);
+                } else if (keyEvent.getCode() == KeyCode.Q) {   //Player 2 jumps//  Player 1 jumps
+                    double power;
+                    long totalJumpPressTime = now - lastJumpPressTime[1];
 
-                    //System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxX());
-                    //System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxY());
-                    //System.out.println(gameCharacter.getPositionX() + " " + gameCharacter.getPositionY());
+                    // TODO: do it better
+                    power = Math.min(maxJumpingPower, (double)totalJumpPressTime / maxJumpPressTime * maxJumpingPower);
+
+                    gameCharacter[1].jump(power);
+                    jumpKeyRelease[1] = true;
+
+                } else if (keyEvent.getCode() == KeyCode.S || keyEvent.getCode() == KeyCode.D) {    // Player 2 accelerates
+                    gameCharacter[1].accelerate(100 / fps, 0);
                 }
                 keyEvent.consume();
             }
@@ -127,45 +170,66 @@ public class GameEngine {
             public void handle(long now) {
                 if (now - lastSceneUpdateTime < 1e9 / Main.fps) return;
 
-                if (!jumpKeyRelease && System.nanoTime() - lastJumpPressTime > maxJumpPressTime) {
-                    gameCharacter.jump(maxJumpingPower);
-                    jumpKeyRelease = true;
-                    lastJumpPressTime = now;
+                for (int i = 0;i < numOfPlayers;i++) {
+                    if (!jumpKeyRelease[i] && System.nanoTime() - lastJumpPressTime[i] > maxJumpPressTime) {
+                        gameCharacter[i].jump(maxJumpingPower);
+                        jumpKeyRelease[i] = true;
+                        lastJumpPressTime[i] = now;
+                    }
+                    updateCollision(i);
+                    updateObstaclesAndGround(i);
+                    updateGameCharacter(i);
+
+                    // Now update the scene position
+                    cloudGroup[i].setTranslateX((cumulativeSceneDistance[i] % 256) * -1);
+                    sceneGroup[i].setTranslateX(-cumulativeSceneDistance[i]);
+
+                    double characterOffset = gameCharacter[i].getTranslateX() + sceneGroup[i].getTranslateX();
+
+                    if (characterOffset > 512) {
+                        cumulativeSceneDistance[i] += characterOffset - 512;
+                    }
+
+                    cumulativeSceneDistance[i] += Math.abs(sceneSpeed[i]);
+
+
+                    sceneController.clearOutdatedObstacles(i);
+
+
+                    Ground ground = sceneController.getLastGroundObject(i);
+
+                    double groundGap = ground.getGap(sceneGroup[i].getTranslateX());
+                    if (groundGap > groundGapLength) {
+                        sceneController.drawGround(i, Main.SCENE_WIDTH - sceneGroup[i].getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
+                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+                    }
+
+                    if (cumulativeSceneDistance[i] - lastObstacleGeneratingDistance[i] > obstacleGapLength && groundGap < -100) {
+                        sceneController.generateObstacle(i);
+                        lastObstacleGeneratingDistance[i] = cumulativeSceneDistance[i];
+                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
+                    }
                 }
-                updateCollision();
-                updateObstaclesAndGround();
-                updateGameCharacter();
-
-                // Now update the scene position
-                cloudGroup.setTranslateX((cumulativeSceneDistance % 256) * -1);
-                sceneGroup.setTranslateX(-cumulativeSceneDistance);
-
-                double characterOffset = gameCharacter.getTranslateX() + sceneGroup.getTranslateX();
-
-                if(characterOffset > 512) {
-                    cumulativeSceneDistance += characterOffset - 512;
-                }
-
-                cumulativeSceneDistance += Math.abs(sceneSpeed);
-
-
-                sceneController.clearOutdatedObstacles();
-
+//                if (numOfPlayers == 2) {
+//                    int fasterPlayerIndex = cumulativeSceneDistance[1] - cumulativeSceneDistance[0] > 0 ? 1 : 0;
+//                    Ground ground = sceneController.getLastGroundObject(fasterPlayerIndex);
+//
+//                    double groundGap = ground.getGap(sceneGroup[fasterPlayerIndex].getTranslateX());
+//                    if (groundGap > groundGapLength) {
+//                        Ground newGround = sceneController.drawGround(fasterPlayerIndex, Main.SCENE_WIDTH - sceneGroup[fasterPlayerIndex].getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
+//                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+//
+//                        bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newGround));
+//                    }
+//
+//                    if (cumulativeSceneDistance[fasterPlayerIndex] - lastObstacleGeneratingDistance[fasterPlayerIndex] > obstacleGapLength && groundGap < -100) {
+//                        sceneController.generateObstacle(fasterPlayerIndex);
+//                        lastObstacleGeneratingDistance[fasterPlayerIndex] = cumulativeSceneDistance[fasterPlayerIndex];
+//                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
+//                    }
+//
+//                }
                 lastSceneUpdateTime = now;
-
-                Ground ground = sceneController.getLastGroundObject();
-
-                double groundGap = ground.getGap(sceneGroup.getTranslateX());
-                if (groundGap > groundGapLength) {
-                    sceneController.drawGround(Main.SCENE_WIDTH - sceneGroup.getTranslateX(), rand.nextInt(2000) + Ground.minGroundLength, Color.BLACK);
-                    groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
-                }
-
-                if (cumulativeSceneDistance - lastObstacleGeneratingDistance > obstacleGapLength && groundGap < -100) {
-                    sceneController.generateObstacle();
-                    lastObstacleGeneratingDistance = cumulativeSceneDistance;
-                    obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
-                }
             }
         }.start();
     }
@@ -222,61 +286,45 @@ public class GameEngine {
             } else if (objMaxY >= obstacleMinY) {
                 obj.collisionDownward(obstacleMinY, obstacle);
             }
-
-//            if ((obstacle instanceof Ground) || (obstacle instanceof RectangleObstacle)) {
-//                if (objMaxX <= obstacleMinX || objMinX >= obstacleMaxX) {
-//                    obj.horizontalCollision(false);
-//                } else if (objMaxY >= obstacleMinY) {
-//                    obj.collisionDownward(obstacleMinY, false);
-//                }
-//            } else if ((obj instanceof GameCharacter) && (obstacle instanceof CircleObstacle)) {
-//                if (objMaxX <= obstacleMinX || objMinX >= obstacleMaxX) {
-//                    obj.horizontalCollision(true);
-//                } else if (objMaxY >= obstacleMinY) {
-//                    obj.collisionDownward(obstacleMinY, false);
-//                }
-//            } else if ((obj instanceof GameCharacter) && (obstacle instanceof ThornObstacle)) {
-//                obj.die();
-//            }
         }
     }
 
-    void updateCollision() {
-        for (Obstacle obstacle : obstacleQueue) {
-            updateObstacleCollision(gameCharacter, obstacle);
+    void updateCollision(int i) {
+        for (Obstacle obstacle : obstacleQueue[i]) {
+            updateObstacleCollision(gameCharacter[i], obstacle);
         }
 
-        for (Obstacle ground : groundQueue) {
-            updateObstacleCollision(gameCharacter, ground);
-        }
+//        for (Obstacle ground : groundQueue[i]) {
+//            updateObstacleCollision(gameCharacter[i], ground);
+//        }
 
-        Iterator<Obstacle> iter = obstacleQueue.iterator();
+        Iterator<Obstacle> iter = obstacleQueue[i].iterator();
         while (iter.hasNext()) {
             Obstacle obj = iter.next();
             if (obj instanceof CircleObstacle) {
 
-                for (Obstacle obstacle : obstacleQueue) {
+                for (Obstacle obstacle : obstacleQueue[i]) {
                     updateObstacleCollision(obj, obstacle);
                 }
 
-                for (Obstacle ground : groundQueue) {
-                    updateObstacleCollision(obj, ground);
-                }
+//                for (Obstacle ground : groundQueue[i]) {
+//                    updateObstacleCollision(obj, ground);
+//                }
             }
         }
     }
 
-    void updateGameCharacter() {
-        gameCharacter.move();
+    void updateGameCharacter(int i) {
+        gameCharacter[i].move();
     }
 
-    void updateObstaclesAndGround() {
-        for (Obstacle obj : obstacleQueue) {
+    void updateObstaclesAndGround(int i) {
+        for (Obstacle obj : obstacleQueue[i]) {
             obj.move();
         }
-        for (Obstacle obj : groundQueue) {
-            obj.move();
-        }
+//        for (Obstacle obj : groundQueue[i]) {
+//            obj.move();
+//        }
     }
 
     public EventHandler<KeyEvent> getPressHandler() {
@@ -287,43 +335,38 @@ public class GameEngine {
         return releaseHandler;
     };
 
-    public static double getSceneSpeed() {
-        return sceneSpeed;
+    public static double getSceneSpeed(int i) {
+        return sceneSpeed[i];
     }
 
-    public static void updateSceneSpeed(double s) {
-        sceneSpeed = s;
+    public static void updateSceneSpeed(int i, double s) {
+        sceneSpeed[i] = s;
     }
 
     public long timeNow() { return System.nanoTime(); }
 
-    public double getCumulativeSceneDistance() {
-        return cumulativeSceneDistance;
+    public double getCumulativeSceneDistance(int i) {
+        return cumulativeSceneDistance[i];
     }
 
-    public void kick() {
+    public void kick(int i) {
         System.out.println("kick in GameEngine");
-        double gcPosMinX = gameCharacter.getBoundsInParent().getMinX();
-        double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX();
-        double gcPosMinY = gameCharacter.getBoundsInParent().getMinY();
-        double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY();
-        Iterator<Obstacle> iter = obstacleQueue.iterator();
-        Obstacle obstacleToRemove = null;
+        double gcMaxX = gameCharacter[i].getBoundsInParent().getMaxX();
+        double gcMaxY = gameCharacter[i].getBoundsInParent().getMaxY();
+        Iterator<Obstacle> iter = obstacleQueue[i].iterator();
         while (iter.hasNext()) {
             Obstacle obstacle = iter.next();
             if (obstacle instanceof RectangleObstacle) {
                 double obstacleMinX = obstacle.getBoundsInParent().getMinX();
-                double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
-                double obstacleMinY = obstacle.getBoundsInParent().getMinY();
                 double obstacleMaxY = obstacle.getBoundsInParent().getMaxY();
-                System.out.println("gcPosMaxX: " + gcPosMaxX);
-                System.out.println("gcPosMaxY: " + gcPosMaxY);
+                System.out.println("gcPosMaxX: " + gcMaxX);
+                System.out.println("gcPosMaxY: " + gcMaxY);
                 System.out.println("obstacleMinX: " + obstacleMinX);
                 System.out.println("obstacleMaxY: " + obstacleMaxY);
-                if (gcPosMaxX > obstacleMinX + 3) return;
-                if (gcPosMaxY < -3) return;
+                if (gcMaxX > obstacleMinX + 3) return;
+                if (gcMaxY < -3) return;
                 if (obstacleMaxY < -3) return;
-                if (obstacleMinX - gcPosMaxX <= 10) {
+                if (obstacleMinX - gcMaxX <= 10) {
                     obstacle.die();
                     iter.remove();
                     break;

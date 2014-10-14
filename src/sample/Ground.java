@@ -12,7 +12,7 @@ public class Ground extends Obstacle {
     private double originalMaxX;
     private double length;
     public Ground(double posX, double length, double originalSceneGroupTranslate) {
-        Rectangle rec = new Rectangle(posX, 0, length, 300);
+        Rectangle rec = new Rectangle(posX, 0, length, Main.GROUND_HEIGHT);
         rec.setStroke(Color.BLACK);
         rec.setFill(Color.WHITE);
         //rec.setFill(Color.BLACK);
