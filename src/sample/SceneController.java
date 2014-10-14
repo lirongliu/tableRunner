@@ -20,44 +20,67 @@ import java.util.Random;
 public class SceneController {
     Group root;
     final private String[] obstacleTypes = {"Rectangle", "Thorn", "Circle"};
-    private Queue<Obstacle> obstacleQueue;
-    private Queue<Ground> groundQueue;
+    private Queue<Obstacle> obstacleQueue[];
+//    private Queue<Ground> groundQueue[];
     private int numberOfObstacleTypes = obstacleTypes.length;
     private Random rand = new Random();
 
-    private Ground lastGroundObject;
+    private Ground lastGroundObject[];
 
     private double clearThreshold = 100;    // distance. Used to clear the objects out of the scene
 
-    final private static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
+    final public static int newObstaclePositionOffsetToScene = 20;     //  distance to the right of the scene
 
 
-    private Group cloudGroup;
-    private Group sceneGroup;
+    private Group[] cloudGroup;
+    private Group[] sceneGroup;
 
-    public SceneController(Group root) {
+    private int numOfPlayers;
+
+    public SceneController(Group root, int numOfPlayers) {
+        this.numOfPlayers = numOfPlayers;
+        lastGroundObject = new Ground[2];
         this.root = root;
-        obstacleQueue = new LinkedList<Obstacle>();
-        groundQueue = new LinkedList<Ground>();
-
-
-        cloudGroup = new Group();
+        obstacleQueue = new LinkedList[numOfPlayers];
+//        groundQueue = new LinkedList[numOfPlayers];
+        cloudGroup = new Group[numOfPlayers];
+        sceneGroup = new Group[numOfPlayers];
 
         Image cloudImage = new Image("sample/images/CloudBG.png");
-        cloudGroup.getChildren().add(new ImageView(cloudImage));
+        for (int i = 0;i < numOfPlayers;i++) {
+            obstacleQueue[i] = new LinkedList<Obstacle>();
+//            groundQueue[i] = new LinkedList<Ground>();
+            cloudGroup[i] = new Group();
 
-        root.getChildren().add(cloudGroup);
-        cloudGroup.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 240);
+            cloudGroup[i].getChildren().add(new ImageView(cloudImage));
+
+            root.getChildren().add(cloudGroup[i]);
+            cloudGroup[i].setTranslateY(Main.SCENE_HEIGHT - (Main.GROUND_HEIGHT + 240) * (i + 1) - (i * 30));
 
 
-        sceneGroup = new Group();
-        root.getChildren().add(sceneGroup);
-        sceneGroup.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
+            sceneGroup[i] = new Group();
+            root.getChildren().add(sceneGroup[i]);
+            sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT * (i + 1) - (i * 240) - (i * 30));
+        }
+
+//        Image cloudImage = new Image("sample/images/CloudBG.png");
+//        cloudGroup[0].getChildren().add(new ImageView(cloudImage));
+//
+//        root.getChildren().add(cloudGroup[0]);
+//        cloudGroup[0].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 240);
+//
+//
+//        sceneGroup[0] = new Group();
+//        root.getChildren().add(sceneGroup[0]);
+//        sceneGroup[0].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
+
     }
 
-    void generateObstacle() {
+    public Obstacle generateObstacle(int i) {
+        System.out.println("generating an obstacle");
         String obstacleType = obstacleTypes[rand.nextInt(numberOfObstacleTypes)];
         if (obstacleType.equals("Rectangle")) {
+            System.out.println("Rectangle");
             RectangleObstacle rec = new RectangleObstacle(
                                             RectangleObstacle.minObstacleWidth +
                                                 rand.nextInt(
@@ -70,10 +93,12 @@ public class SceneController {
                                                     RectangleObstacle.minObstacleHeight + 1
                                             ));
 
-            rec.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
-            sceneGroup.getChildren().add(rec);
-            obstacleQueue.add(rec);
+            rec.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup[i].getChildren().add(rec);
+            obstacleQueue[i].add(rec);
+            return rec;
         } else if (obstacleType.equals("Thorn")) {
+            System.out.println("Thorn");
             ThornObstacle thornObstacle = new ThornObstacle(
                     ThornObstacle.minObstacleWidth +
                             rand.nextInt(
@@ -87,54 +112,62 @@ public class SceneController {
                             ),
                     rand.nextInt(ThornObstacle.maxThornCountInARow) + ThornObstacle.minThornCountInARow
             );
-            thornObstacle.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
-            sceneGroup.getChildren().add(thornObstacle);
-            obstacleQueue.add(thornObstacle);
+            thornObstacle.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup[i].getChildren().add(thornObstacle);
+            obstacleQueue[i].add(thornObstacle);
+            return thornObstacle;
         } else if (obstacleType.equals("Circle")) {
+            System.out.println("Circle");
             CircleObstacle circleObstacle = new CircleObstacle();
-            circleObstacle.setTranslateX(Math.abs(sceneGroup.getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
-            sceneGroup.getChildren().add(circleObstacle);
-            obstacleQueue.add(circleObstacle);
+            circleObstacle.setTranslateX(Math.abs(sceneGroup[i].getTranslateX()) + Main.SCENE_WIDTH + newObstaclePositionOffsetToScene);
+            sceneGroup[i].getChildren().add(circleObstacle);
+            obstacleQueue[i].add(circleObstacle);
+            return circleObstacle;
+        } else {
+            return null;
         }
     }
 
-    GameCharacter generateCharacter() {
+    GameCharacter[] generateCharacter() {
         int originalX = Main.SCENE_WIDTH / 3;
 
-        GameCharacter gameCharacter = new GameCharacter();
-        sceneGroup.getChildren().add(gameCharacter);
+        GameCharacter gameCharacter[] = new GameCharacter[numOfPlayers];
+        for (int i = 0;i < numOfPlayers;i++) {
+            gameCharacter[i] = new GameCharacter();
+            sceneGroup[i].getChildren().add(gameCharacter[i]);
 
-        gameCharacter.setTranslateX(originalX);
-        //gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
+            gameCharacter[i].setTranslateX(originalX);
+            //gameCharacter.setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 20);
+        }
 
         return gameCharacter;
     }
 
-    void generateInitialScene() {
+    void generateInitialScene(int i) {
         Random random = new Random();
-        drawGround(0, 1500, Color.BLACK); //rand.nextInt(1000) + Ground.minGroundLength
+        drawGround(i, 0, 1500); //rand.nextInt(1000) + Ground.minGroundLength
     }
 
 //    Shape drawCircleObstacle(double x, double y, double r, Color color) {
 //        Circle circle = new Circle(x, Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - y - r, r);
 //        circle.setFill(color);
 //        root.getChildren().add(circle);
-//        //obstacleQueue.add(new CircleObstacle(circle));
+//        //obstacleQueue[0].add(new CircleObstacle(circle));
 //        return circle;
 //    }
 
     // posX: screen position
-    Ground drawGround(double posX, double length, Color color) {
-        Ground newGround = new Ground(posX, length, sceneGroup.getTranslateX());
-        sceneGroup.getChildren().add(newGround);
-        groundQueue.add(newGround);
-        lastGroundObject = newGround;
+    Ground drawGround(int i, double posX, double length) {
+        Ground newGround = new Ground(posX, length);
+        sceneGroup[i].getChildren().add(newGround);
+        obstacleQueue[i].add(newGround);
+        lastGroundObject[i] = newGround;
         return newGround;
     }
 
 //    Rectangle drawRectangleObstacle(double x, double y, double w, double h, Color color) {
 //        root.getChildren().add(rec);
-//        obstacleQueue.add(new RectangleObstacle(rec));
+//        obstacleQueue[0].add(new RectangleObstacle(rec));
 //        return rec;
 //    }
 
@@ -148,54 +181,56 @@ public class SceneController {
 //            );
 //            triangle.setFill(color);
 //            root.getChildren().add(triangle);
-//            obstacleQueue.add(new ThornObstacle(triangle));
+//            obstacleQueue[0].add(new ThornObstacle(triangle));
 //        }
 //    }
 
 
-    void clearOutdatedObstacles() {
-        Iterator<Obstacle> iter = obstacleQueue.iterator();
+    void clearOutdatedObstacles(int i) {
+        Iterator<Obstacle> iter = obstacleQueue[i].iterator();
         while (iter.hasNext()) {
             Group obstacle = iter.next();
             Bounds bounds = obstacle.getBoundsInParent();
-            double minX = bounds.getMinX() + sceneGroup.getTranslateX();
-            double maxX = bounds.getMaxX() + sceneGroup.getTranslateX();
-            double minY = bounds.getMinY() + sceneGroup.getTranslateY();
-            double maxY = bounds.getMaxY() + sceneGroup.getTranslateY();
+            double minX = bounds.getMinX() + sceneGroup[i].getTranslateX();
+            double maxX = bounds.getMaxX() + sceneGroup[i].getTranslateX();
+            double minY = bounds.getMinY() + sceneGroup[i].getTranslateY();
+            double maxY = bounds.getMaxY() + sceneGroup[i].getTranslateY();
 //            Bounds bounds = obstacle.getLayoutBounds();
 //            double translateX = obstacle.getTranslateX();
 //            double translateY = obstacle.getTranslateY();
             if (maxX < -clearThreshold) {
-                sceneGroup.getChildren().remove(obstacle);
+                sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
             } else if (maxY < -clearThreshold) {
-                sceneGroup.getChildren().remove(obstacle);
+                sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
             } else if (minX > Main.SCENE_WIDTH + clearThreshold) {
-                sceneGroup.getChildren().remove(obstacle);
+                sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
             }else if (minY > Main.SCENE_HEIGHT + clearThreshold) {
-                sceneGroup.getChildren().remove(obstacle);
+                sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
             }
         }
     }
 
-    public Queue<Obstacle> getObstacleQueue() {
-        return this.obstacleQueue;
+    public Queue<Obstacle> getObstacleQueue(int i) {
+        return this.obstacleQueue[i];
     }
 
-    public Queue<Ground> getGroundQueue() {
-        return this.groundQueue;
+//    public Queue<Ground> getGroundQueue(int i) {
+//        return this.groundQueue[i];
+//    }
+
+    public Group getCloudGroup(int i) {
+        return this.cloudGroup[i];
     }
 
-    public Group getCloudGroup() {
-        return this.cloudGroup;
+    public Group getSceneGroup(int i) {
+        return this.sceneGroup[i];
     }
 
-    public Group getSceneGroup() {
-        return this.sceneGroup;
-    }
+    public Ground getLastGroundObject(int i) { return lastGroundObject[i]; }
 
-    public Ground getLastGroundObject() { return lastGroundObject; }
+    public void setLastGroundObject(int i, Ground lastGroundObject) { this.lastGroundObject[i] = lastGroundObject; }
 }

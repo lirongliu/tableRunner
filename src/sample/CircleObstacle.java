@@ -31,12 +31,14 @@ public class CircleObstacle extends Obstacle {
     @Override
     public void horizontalCollision(GameObject collidingObj) {
         if (collidingObj instanceof GameCharacter) return;
+        if (collidingObj instanceof ThornObstacle) return;
         velocityX = -velocityX; //GameEngine.getSceneSpeed();
     }
 
     @Override
     public void collisionDownward(double y, GameObject collidingObj) {
         if (collidingObj instanceof GameCharacter) return;
+        if (collidingObj instanceof ThornObstacle) return;
         land(y);
     }
 
@@ -49,5 +51,11 @@ public class CircleObstacle extends Obstacle {
     // TODO
     public void rotate() {
 
+    }
+
+    @Override
+    public CircleObstacle getDeepCopy() {
+        System.out.println("circle deep copy");
+        return new CircleObstacle();
     }
 }

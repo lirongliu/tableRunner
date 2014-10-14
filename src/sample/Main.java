@@ -22,16 +22,18 @@ public class Main extends Application {
 
     final public static int SCENE_WIDTH = 1024;
     final public static int SCENE_HEIGHT = 768;
-    final public static double GROUND_HEIGHT = 100;
+    final public static double GROUND_HEIGHT = 70;
     final public static int fps = 60;   //  max fps
 
     private Group root;
 
-    private GameCharacter gameCharacter;
+    private GameCharacter gameCharacter[];
     private SceneController sceneController;
     private GameEngine gameEngine;
 
     private SerialController controller;
+
+    private int numOfPlayers;
 
     public static void main(String[] args) {
         launch(args);
@@ -49,18 +51,22 @@ public class Main extends Application {
         controller = new SerialController();
         controller.initialize();
 
+        numOfPlayers = 2;
+
         stage.setOnHiding(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent event) {
                 controller.close();
             }
         });
 
-        sceneController = new SceneController(root);
+        sceneController = new SceneController(root, numOfPlayers);
         gameCharacter = sceneController.generateCharacter();
-        sceneController.generateInitialScene();
-        gameEngine = new GameEngine(scene, sceneController, gameCharacter);
+        for (int i = 0;i < numOfPlayers;i++) {
+            sceneController.generateInitialScene(i);
+        }
+        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers);
 
-        controller.setCharacters(gameCharacter);
+        //controller.setCharacters(gameCharacter);
 
         gameEngine.setup();
         gameEngine.run();

@@ -25,6 +25,7 @@ public class RectangleObstacle extends Obstacle {
 
 
     public RectangleObstacle(int width, int height) {
+        super();
         Rectangle rec = new Rectangle(0, 0, width, height);
         w = width;
         h = height;
@@ -68,5 +69,11 @@ public class RectangleObstacle extends Obstacle {
 
             transition.setOnFinished(eventOnFinished);
         }
+    }
+
+    @Override
+    public RectangleObstacle getDeepCopy() {
+        System.out.println("Rectangle deep copy");
+        return new RectangleObstacle(w, h);
     }
 }

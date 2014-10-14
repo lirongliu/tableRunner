@@ -12,6 +12,8 @@ public class Obstacle extends GameObject {
     public static int maxObstacleHeight = 100;
 
     public Obstacle(/*Shape obj*/) {
+        this.velocityX = 0;
+        this.velocityY = 0;
         /*this.obj = obj;*/
         //this.velocityX = GameEngine.getSceneSpeed();
         //this.velocityY = 0.0;
@@ -38,5 +40,10 @@ public class Obstacle extends GameObject {
 
     public void die() {
 
+    }
+
+    @Override
+    public Obstacle getDeepCopy() {
+        return new Obstacle();
     }
 }

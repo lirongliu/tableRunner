@@ -622,4 +622,9 @@ public class GameCharacter extends GameObject {
             System.out.println("State: " + state);
         }
     }
+
+    @Override
+    public GameCharacter getDeepCopy() {
+        return new GameCharacter();
+    }
 }
