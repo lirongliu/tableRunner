@@ -180,6 +180,7 @@ public class GameCharacter extends GameObject {
         return !jumping;
     }
 
+    @Override
     public void land(double y) {
         jumping = false;
         velocityY = 0;
@@ -229,11 +230,20 @@ public class GameCharacter extends GameObject {
         System.out.println("kick in GameCharacter.java");
     }
 
-    public void collideForward() {
+    @Override
+    public void horizontalCollision(GameObject collidingObj) {
+        if ((collidingObj instanceof CircleObstacle) || (collidingObj instanceof ThornObstacle)) {
+            die();
+            return;
+        }
         velocityX = 0; //GameEngine.getSceneSpeed();
     }
 
-    public void collideDownward(double y) {
+    public void collisionDownward(double y, GameObject collidingObj) {
+        if (collidingObj instanceof ThornObstacle) {
+            die();
+            return;
+        }
         land(y);
     }
 

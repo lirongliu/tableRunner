@@ -2,17 +2,11 @@ package sample;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
-import javafx.scene.shape.Shape;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -176,11 +170,13 @@ public class GameEngine {
         }.start();
     }
 
-    void updateObstacleCollision(Obstacle obstacle) {
-        double gcPosMinX = gameCharacter.getBoundsInParent().getMinX();
-        double gcPosMaxX = gameCharacter.getBoundsInParent().getMaxX();
-        double gcPosMinY = gameCharacter.getBoundsInParent().getMinY();
-        double gcPosMaxY = gameCharacter.getBoundsInParent().getMaxY();
+    void updateObstacleCollision(GameObject obj, Obstacle obstacle) {
+        if (obj == obstacle) return;
+
+        double objMinX = obj.getBoundsInParent().getMinX();
+        double objMaxX = obj.getBoundsInParent().getMaxX();
+        double objMinY = obj.getBoundsInParent().getMinY();
+        double objMaxY = obj.getBoundsInParent().getMaxY();
         double obstacleMinX = obstacle.getBoundsInParent().getMinX();
         double obstacleMaxX = obstacle.getBoundsInParent().getMaxX();
         double obstacleMinY = obstacle.getBoundsInParent().getMinY();
@@ -192,59 +188,81 @@ public class GameEngine {
 
         double px, qx, rx, sx;
         double py, qy, ry, sy;
-        if (gcPosMinX < obstacleMinX) {
-            px = gcPosMinX + gameCharacter.getVelocityX();
-            qx = gcPosMaxX + gameCharacter.getVelocityX();
-            rx = obstacleMinX;
-            sx = obstacleMaxX;
+        if (objMinX < obstacleMinX) {
+            px = objMinX + obj.getVelocityX();
+            qx = objMaxX + obj.getVelocityX();
+            rx = obstacleMinX + obstacle.getVelocityX();
+            sx = obstacleMaxX + obstacle.getVelocityX();
         } else {
-            rx = gcPosMinX + gameCharacter.getVelocityX();
-            sx = gcPosMaxX + gameCharacter.getVelocityX();
-            px = obstacleMinX;
-            qx = obstacleMaxX;
+            rx = objMinX + obj.getVelocityX();
+            sx = objMaxX + obj.getVelocityX();
+            px = obstacleMinX + obstacle.getVelocityX();
+            qx = obstacleMaxX + obstacle.getVelocityX();
         }
 
-        if (gcPosMinY < obstacleMinY) {
-            py = gcPosMinY + gameCharacter.getVelocityY();
-            qy = gcPosMaxY + gameCharacter.getVelocityY();
-            ry = obstacleMinY;
-            sy = obstacleMaxY;
+        if (objMinY < obstacleMinY) {
+            py = objMinY + obj.getVelocityY();
+            qy = objMaxY + obj.getVelocityY();
+            ry = obstacleMinY + obstacle.getVelocityY();
+            sy = obstacleMaxY + obstacle.getVelocityY();
         } else {
-            ry = gcPosMinY + gameCharacter.getVelocityY();
-            sy = gcPosMaxY + gameCharacter.getVelocityY();
-            py = obstacleMinY;
-            qy = obstacleMaxY;
+            ry = objMinY + obj.getVelocityY();
+            sy = objMaxY + obj.getVelocityY();
+            py = obstacleMinY + obstacle.getVelocityY();
+            qy = obstacleMaxY + obstacle.getVelocityY();
         }
 
 //            System.out.println("(qx - px) * (rx - qx) * (sx - rx): " + (qx - px) * (rx - qx) * (sx - rx));
 //            System.out.println("(qy - py) * (ry - qy) * (sy - ry): " + (qy - py) * (ry - qy) * (sy - ry));
 
         if ((qx - px) * (rx - qx) * (sx - rx) <= 0 && (qy - py) * (ry - qy) * (sy - ry) <= 0) {
-            if ((obstacle instanceof Ground) || (obstacle instanceof RectangleObstacle)) {
-                if (gcPosMaxX <= obstacleMinX) {
-                    gameCharacter.collideForward();
-                } else if (gcPosMaxY >= obstacleMinY) {
-                    gameCharacter.collideDownward(obstacleMinY);
-                }
-            } else if (obstacle instanceof CircleObstacle) {
-                if (gcPosMaxX <= obstacleMinX) {
-                    gameCharacter.die();
-                } else if (gcPosMaxY >= obstacleMinY) {
-                    gameCharacter.collideDownward(obstacleMinY);
-                }
-            } else if (obstacle instanceof ThornObstacle) {
-                gameCharacter.die();
+            if (objMaxX <= obstacleMinX || objMinX >= obstacleMaxX) {
+                obj.horizontalCollision(obstacle);
+                obstacle.horizontalCollision(obj);
+            } else if (objMaxY >= obstacleMinY) {
+                obj.collisionDownward(obstacleMinY, obstacle);
             }
+
+//            if ((obstacle instanceof Ground) || (obstacle instanceof RectangleObstacle)) {
+//                if (objMaxX <= obstacleMinX || objMinX >= obstacleMaxX) {
+//                    obj.horizontalCollision(false);
+//                } else if (objMaxY >= obstacleMinY) {
+//                    obj.collisionDownward(obstacleMinY, false);
+//                }
+//            } else if ((obj instanceof GameCharacter) && (obstacle instanceof CircleObstacle)) {
+//                if (objMaxX <= obstacleMinX || objMinX >= obstacleMaxX) {
+//                    obj.horizontalCollision(true);
+//                } else if (objMaxY >= obstacleMinY) {
+//                    obj.collisionDownward(obstacleMinY, false);
+//                }
+//            } else if ((obj instanceof GameCharacter) && (obstacle instanceof ThornObstacle)) {
+//                obj.die();
+//            }
         }
     }
 
     void updateCollision() {
         for (Obstacle obstacle : obstacleQueue) {
-            updateObstacleCollision(obstacle);
+            updateObstacleCollision(gameCharacter, obstacle);
         }
 
         for (Obstacle ground : groundQueue) {
-            updateObstacleCollision(ground);
+            updateObstacleCollision(gameCharacter, ground);
+        }
+
+        Iterator<Obstacle> iter = obstacleQueue.iterator();
+        while (iter.hasNext()) {
+            Obstacle obj = iter.next();
+            if (obj instanceof CircleObstacle) {
+
+                for (Obstacle obstacle : obstacleQueue) {
+                    updateObstacleCollision(obj, obstacle);
+                }
+
+                for (Obstacle ground : groundQueue) {
+                    updateObstacleCollision(obj, ground);
+                }
+            }
         }
     }
 

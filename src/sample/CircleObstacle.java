@@ -24,6 +24,28 @@ public class CircleObstacle extends Obstacle {
         rotate();
     }
 
+    public void updateSpeed() {
+        velocityY = velocityY + GameEngine.gravity;
+    }
+
+    @Override
+    public void horizontalCollision(GameObject collidingObj) {
+        if (collidingObj instanceof GameCharacter) return;
+        velocityX = -velocityX; //GameEngine.getSceneSpeed();
+    }
+
+    @Override
+    public void collisionDownward(double y, GameObject collidingObj) {
+        if (collidingObj instanceof GameCharacter) return;
+        land(y);
+    }
+
+    @Override
+    public void land(double y) {
+        velocityY = 0;
+        this.setTranslateY(y);
+    }
+
     // TODO
     public void rotate() {
 

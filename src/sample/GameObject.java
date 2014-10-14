@@ -21,6 +21,12 @@ public abstract class GameObject extends Group {
         return velocityY;
     }
 
+    public void horizontalCollision(GameObject collidingObj) {};
+
+    public void collisionDownward(double y, GameObject collidingObj) {};
+
+    public void land(double y) {};
+
     abstract void move();
 
     abstract void updateSpeed();
