@@ -10,16 +10,24 @@ public class SerialController implements SerialPortEventListener {
 
     private GameCharacter player1;  // For now, this directly dumps input data into the game character
 
+    private String[] portnames = {"/dev/tty.usbmodemfd121", "/dev/tty.usbmodemfa131"};
+
     /*
     Set up the port.
      */
     public void initialize() {
         String[] list = SerialPortList.getPortNames();
         for(String name:list) {
+            for(String possibleName:portnames) {
+                if(name.equals(possibleName)) {
+                    serialPort = new SerialPort(name);
+                    break;
+                }
+            }
             System.out.print(name);
         }
 
-        serialPort = new SerialPort("/dev/tty.usbmodemfa131");
+        //serialPort = new SerialPort("/dev/tty.usbmodemfa131");
 
         try {
             serialPort.openPort();

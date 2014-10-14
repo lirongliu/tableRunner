@@ -31,6 +31,7 @@ public class GameEngine {
     private double cumulativeSceneDistance; //  absolute value
     private double minObstacleInterval = 300;  //  distance
     private double maxObstacleInterval = 1000;  //  distance
+    private double acceleration = 250;
 
     final public static double maxJumpingPower = 1500;     //  Increased Y velocity
 
@@ -106,7 +107,7 @@ public class GameEngine {
                     jumpKeyRelease = true;
 
                 } else if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.DOWN) {   //  accelerate
-                    gameCharacter.accelerate(100 / fps, 0);
+                    gameCharacter.accelerate(acceleration / fps, 0);
                 } else if (keyEvent.getCode() == KeyCode.P) {
 
                     //System.out.println(gameCharacter.getShapeObject().localToParent(gameCharacter.getShapeObject().getLayoutBounds()).getMaxX());
