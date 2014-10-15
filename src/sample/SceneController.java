@@ -16,7 +16,6 @@ import java.util.Random;
  * Created by lirong on 10/3/14.
  */
 
-// TODO: Add gap obstacles (could be tricky because there should be no obstacle between the gap)
 public class SceneController {
     Group root;
     final private String[] obstacleTypes = {"Rectangle", "Thorn", "Circle"};
@@ -35,6 +34,8 @@ public class SceneController {
     private Group[] cloudGroup;
     private Group[] sceneGroup;
 
+    private Rectangle[] clippingRects;
+
     private int numOfPlayers;
 
     public SceneController(Group root, int numOfPlayers) {
@@ -45,6 +46,7 @@ public class SceneController {
 //        groundQueue = new LinkedList[numOfPlayers];
         cloudGroup = new Group[numOfPlayers];
         sceneGroup = new Group[numOfPlayers];
+        clippingRects = new Rectangle[numOfPlayers];
 
         Image cloudImage = new Image("sample/images/CloudBG.png");
         for (int i = 0;i < numOfPlayers;i++) {
@@ -55,12 +57,14 @@ public class SceneController {
             cloudGroup[i].getChildren().add(new ImageView(cloudImage));
 
             root.getChildren().add(cloudGroup[i]);
-            cloudGroup[i].setTranslateY(Main.SCENE_HEIGHT - (Main.GROUND_HEIGHT + 240) * (i + 1) - (i * 30));
+            cloudGroup[i].setTranslateY(Main.SCENE_HEIGHT - 384 * (i + 1));
 
+            clippingRects[i] = new Rectangle(0, Main.GROUND_HEIGHT - 384, Main.SCENE_WIDTH, 384);
 
             sceneGroup[i] = new Group();
+            sceneGroup[i].setClip(clippingRects[i]);
             root.getChildren().add(sceneGroup[i]);
-            sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT * (i + 1) - (i * 240) - (i * 30));
+            sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - (i * 384));
         }
 
 //        Image cloudImage = new Image("sample/images/CloudBG.png");
@@ -228,6 +232,10 @@ public class SceneController {
 
     public Group getSceneGroup(int i) {
         return this.sceneGroup[i];
+    }
+
+    public Rectangle getClippingRect(int i) {
+        return this.clippingRects[i];
     }
 
     public Ground getLastGroundObject(int i) { return lastGroundObject[i]; }

@@ -45,13 +45,12 @@ public class Main extends Application {
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT, Color.WHITE);
         stage.setTitle("JavaFX Scene Graph Demo");
 
-        //TODO: use full screen, and make sure that everything is the right scale for the given monitor
         //stage.setFullScreen(true);
 
         controller = new SerialController();
         controller.initialize();
 
-        numOfPlayers = 2;
+        numOfPlayers = 1;
 
         stage.setOnHiding(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent event) {
@@ -66,7 +65,7 @@ public class Main extends Application {
         }
         gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers);
 
-        //controller.setCharacters(gameCharacter);
+        controller.setCharacters(gameCharacter);
 
         gameEngine.setup();
         gameEngine.run();

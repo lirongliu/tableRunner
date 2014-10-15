@@ -33,16 +33,18 @@ public class GameCharacter extends GameObject {
     private ImageView rightShin;
     private ImageView rightFoot;
 
-    private float[][] leftStates = {{  0,   0, 0},
-                                    {-40,  80, -40},
-                                    {-80, 160, -80}};
+    //private float[][] leftStates = {{  0,   0, 0},
+    //                                {-40,  80, -40},
+      //                              {-80, 160, -80}};
 
-    private float[][] rightStates = {{  0,   0, 0},
-                                    {-40,  80, -40},
-                                    {-80, 160, -80}};
+    //private float[][] rightStates = {{  0,   0, 0},
+        //                            {-40,  80, -40},
+          //                          {-80, 160, -80}};
 
 
-    //leftStates = {{-30, 10, 20}, {0,  0, 0}, { 30,  10, -40}};
+    private float[][] leftStates = {{-30, 10, 20}, {0,  0, 0}, { 30,  10, -40}};
+
+    private float[][] rightStates = {{-30, 10, 20}, {0,  0, 0}, { 30,  10, -40}};
     
     private double lastXVelocityDecrease;
     final private double initialXVelocityDampingRatio = 0.002;
@@ -313,10 +315,6 @@ public class GameCharacter extends GameObject {
                     state = 11;
                 } else if (action == 1) {
                     state = 1;
-
-                    leftStates[0][0] = -30;
-                    leftStates[0][1] = 10;
-                    leftStates[0][2] = 20;
                 } else if (action == 2) {
                     state = 3;
                 }
@@ -420,6 +418,14 @@ public class GameCharacter extends GameObject {
                 } else {
                     if (action == 1) {
                         state = 10;
+
+                        rightStates[1][0] = -50;
+                        rightStates[1][1] = 100;
+                        rightStates[1][2] = -50;
+
+                        leftStates[1][0] = 0;
+                        leftStates[1][1] = 0;
+                        leftStates[1][2] = 0;
                     } else if (action == 3) {
                         state = 12;
                     }
@@ -433,6 +439,14 @@ public class GameCharacter extends GameObject {
                 } else {
                     if (action == 2) {
                         state = 9;
+
+                        leftStates[1][0] = -50;
+                        leftStates[1][1] = 100;
+                        leftStates[1][2] = -50;
+
+                        rightStates[1][0] = 0;
+                        rightStates[1][1] = 0;
+                        rightStates[1][2] = 0;
                     } else if (action == 3) {
                         state = 12;
                     }

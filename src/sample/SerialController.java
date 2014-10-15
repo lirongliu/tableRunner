@@ -8,7 +8,7 @@ import jssc.*;
 public class SerialController implements SerialPortEventListener {
     private SerialPort serialPort;  // The serial port we'll use
 
-    private GameCharacter player1;  // For now, this directly dumps input data into the game character
+    private GameCharacter[] players;  // For now, this directly dumps input data into the game character
 
     private String[] portnames = {"/dev/tty.usbmodemfd121", "/dev/tty.usbmodemfa131"};
 
@@ -27,7 +27,9 @@ public class SerialController implements SerialPortEventListener {
             System.out.print(name);
         }
 
-        //serialPort = new SerialPort("/dev/tty.usbmodemfa131");
+        if(serialPort == null) {
+            serialPort = new SerialPort("");
+        }
 
         try {
             serialPort.openPort();
@@ -55,13 +57,15 @@ public class SerialController implements SerialPortEventListener {
      */
     public void serialEvent(SerialPortEvent serialPortEvent) {
         try {
-            if(serialPort.getInputBufferBytesCount() >= 2) {
-                byte[] input = serialPort.readBytes(2);
-                double leftBend = (input[0] & 0xFF) / 255.0;
-                double rightBend = (input[1] & 0xFF) / 255.0;
+            if(serialPort.getInputBufferBytesCount() >= 4) {
+                for(int i = 0; i < 2; ++i) {
+                    byte[] input = serialPort.readBytes(2);
+                    double leftBend = (input[0] & 0xFF) / 255.0;
+                    double rightBend = (input[1] & 0xFF) / 255.0;
 
-                if(player1 != null) {
-                    player1.setBend(leftBend, rightBend);
+                    if((players != null) && (players[i] != null)) {
+                        players[i].setBend(leftBend, rightBend);
+                    }
                 }
 
                 // Purge the incoming buffer, so we aren't accidentally reading old data
@@ -79,7 +83,7 @@ public class SerialController implements SerialPortEventListener {
     /*
     Set the game character.
      */
-    public void setCharacters(GameCharacter player1) {
-        this.player1 = player1;
+    public void setCharacters(GameCharacter[] players) {
+        this.players = players;
     }
 }

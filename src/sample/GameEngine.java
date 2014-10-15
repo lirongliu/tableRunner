@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.util.Iterator;
@@ -26,6 +27,7 @@ public class GameEngine {
 
     private GameCharacter gameCharacter[];
     private SceneController sceneController;
+    private Rectangle[] clippingRects;
     private Scene scene;
 
     private long lastSceneUpdateTime;
@@ -83,6 +85,7 @@ public class GameEngine {
         this.gameCharacter = new GameCharacter[numOfPlayers];
         this.cloudGroup = new Group[numOfPlayers];
         this.sceneGroup = new Group[numOfPlayers];
+        this.clippingRects = new Rectangle[numOfPlayers];
         this.numOfPlayers = numOfPlayers;
         this.scene = scene;
         this.sceneController = sceneController;
@@ -93,6 +96,7 @@ public class GameEngine {
             //groundQueue[i] = sceneController.getGroundQueue(i);
             cloudGroup[i] = sceneController.getCloudGroup(i);
             sceneGroup[i] = sceneController.getSceneGroup(i);
+            clippingRects[i] = sceneController.getClippingRect(i);
         }
     }
 
@@ -185,6 +189,8 @@ public class GameEngine {
                     // Now update the scene position
                     cloudGroup[i].setTranslateX((cumulativeSceneDistance[i] % 256) * -1);
                     sceneGroup[i].setTranslateX(-cumulativeSceneDistance[i]);
+
+                    clippingRects[i].setTranslateX(cumulativeSceneDistance[i]);
 
                     double characterOffset = gameCharacter[i].getTranslateX() + sceneGroup[i].getTranslateX();
 
