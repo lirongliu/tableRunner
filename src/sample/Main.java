@@ -28,7 +28,7 @@ public class Main extends Application {
     private Group root;
     private Group menuRoot;
 
-    private Scene menuScene;
+    private MenuScene menuScene;
 
     private Stage stage;
 
@@ -62,15 +62,13 @@ public class Main extends Application {
             }
         });
 
-        gameStart(1);
-        //menuStart();
+        //gameStart(1);
+        menuStart();
 
         stage.show();
     }
 
     public void gameStart(int numOfPlayers) {
-        menuScene = null;
-
         root = new Group();
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT, Color.WHITE);
 
@@ -91,8 +89,13 @@ public class Main extends Application {
     }
 
     public void menuStart() {
-        menuRoot = new Group();
-        menuScene = new MenuScene(menuRoot, this, controller);
+        if(menuRoot == null) {
+            menuRoot = new Group();
+            menuScene = new MenuScene(menuRoot, this, controller);
+        } else {
+            menuScene.clean();
+        }
+
         stage.setScene(menuScene);
     }
 }

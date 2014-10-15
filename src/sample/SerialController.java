@@ -72,16 +72,10 @@ public class SerialController implements SerialPortEventListener {
                     if((players != null) && (players[i] != null)) {
                         players[i].setBend(leftBend, rightBend);
                     }
-
-                    if(i == 0) {
-                        System.out.println("Input: " + (input[0] & 0xFF) + ", " + (input[1] & 0xFF));
-                    }
                 }
 
                 byte[] instructions = serialPort.readBytes(1);
                 this.instruction = instructions[0] & 0xFF;
-
-                System.out.println("Instruction: " + instructions[0]);
 
                 // Purge the incoming buffer, so we aren't accidentally reading old data
                 serialPort.purgePort(SerialPort.PURGE_RXCLEAR);

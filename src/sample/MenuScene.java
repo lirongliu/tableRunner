@@ -68,6 +68,7 @@ public class MenuScene extends Scene {
                         root.getChildren().add(characters[1]);
                         characters[1].setTranslateX(200);
                         characters[1].setTranslateY(500);
+                        player1Label.setText("Player 1 Found");
 
                         controller.setCharacters(characters);
                     }
@@ -75,8 +76,9 @@ public class MenuScene extends Scene {
                     if(characters[0] == null && controller.instruction % 2 == 1) {
                         characters[0] = new GameCharacter();
                         root.getChildren().add(characters[0]);
-                        characters[0].setTranslateX(200);
-                        characters[0].setTranslateY(-200);
+                        characters[0].setTranslateX(400);
+                        characters[0].setTranslateY(500);
+                        player2Label.setText("Player 2 Found");
 
                         controller.setCharacters(characters);
                     }
@@ -105,6 +107,20 @@ public class MenuScene extends Scene {
                 lastSceneUpdateTime = now;
             }
         };
+
+        timer.start();
+    }
+
+    public void clean() {
+        for(int i = 0; i < characters.length; ++i) {
+            if(characters[i] != null) {
+                root.getChildren().remove(characters[i]);
+                characters[i] = null;
+            }
+        }
+
+        root.getChildren().remove(countdown);
+        countdown = null;
 
         timer.start();
     }
