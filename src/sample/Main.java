@@ -56,29 +56,14 @@ public class Main extends Application {
         controller = new SerialController();
         controller.initialize(this);
 
-        /*numOfPlayers = 2;*/
-
         stage.setOnHiding(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent event) {
                 controller.close();
             }
         });
-/*
-        sceneController = new SceneController(root, numOfPlayers);
-        gameCharacter = sceneController.generateCharacter();
-        for (int i = 0;i < numOfPlayers;i++) {
-            sceneController.generateInitialScene(i);
-        }
-        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers);
 
-        controller.setCharacters(gameCharacter);
-
-        gameEngine.setup();
-        gameEngine.run();
-        stage.setScene(scene);
-        stage.show();*/
-        //gameStart(2);
-        menuStart();
+        gameStart(1);
+        //menuStart();
 
         stage.show();
     }
