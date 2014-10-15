@@ -38,6 +38,8 @@ public class GameEngine {
 
     final public static double maxJumpingPower = 1500;     //  Increased Y velocity
 
+    private AnimationTimer timer;
+
     // Event handling variables
     private long lastJumpPressTime[];     //  Last time the jump button was pressed
     private boolean jumpKeyRelease[];
@@ -65,13 +67,16 @@ public class GameEngine {
 
     private int numOfPlayers;
 
+    private SerialController controller;
+    private Main parent;
+
     private boolean gonnaEnd = false;
     private boolean end = false;
     private int gonnaEndDistance = 7500;
     private int endDistance = 10000;
 
 
-    public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers) {
+    public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers, SerialController controller, Main parent) {
         lastJumpPressTime = new long[numOfPlayers];
         jumpKeyRelease = new boolean[numOfPlayers];
         for (int i = 0;i < numOfPlayers;i++) {
@@ -100,6 +105,9 @@ public class GameEngine {
             sceneGroup[i] = sceneController.getSceneGroup(i);
             clippingRects[i] = sceneController.getClippingRect(i);
         }
+
+        this.controller = controller;
+        this.parent = parent;
     }
 
     public void setup() {
@@ -173,11 +181,16 @@ public class GameEngine {
     }
 
     public void run() {
-        new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (end) return;
                 if (now - lastSceneUpdateTime < 1e9 / Main.fps) return;
+
+                if(controller.instruction == 10) {
+                    timer.stop();
+                    parent.menuStart();
+                }
 
                 for (int i = 0;i < numOfPlayers;i++) {
                     if (!jumpKeyRelease[i] && System.nanoTime() - lastJumpPressTime[i] > maxJumpPressTime) {
@@ -283,7 +296,9 @@ public class GameEngine {
                 }
                 lastSceneUpdateTime = now;
             }
-        }.start();
+        };
+
+        timer.start();
     }
 
     void updateObstacleCollision(GameObject obj, Obstacle obstacle) {

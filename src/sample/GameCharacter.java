@@ -669,7 +669,7 @@ public class GameCharacter extends GameObject {
         prevAction = action;
 
         if(prevState != state) {
-            System.out.println("State: " + state);
+            //System.out.println("State: " + state);
         }
     }
 

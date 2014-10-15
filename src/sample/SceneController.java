@@ -66,18 +66,6 @@ public class SceneController {
             root.getChildren().add(sceneGroup[i]);
             sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - (i * 384));
         }
-
-//        Image cloudImage = new Image("sample/images/CloudBG.png");
-//        cloudGroup[0].getChildren().add(new ImageView(cloudImage));
-//
-//        root.getChildren().add(cloudGroup[0]);
-//        cloudGroup[0].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - 240);
-//
-//
-//        sceneGroup[0] = new Group();
-//        root.getChildren().add(sceneGroup[0]);
-//        sceneGroup[0].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT);
-
     }
 
     public Obstacle generateObstacle(int i) {
