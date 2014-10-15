@@ -62,7 +62,7 @@ public class Main extends Application {
             }
         });
 
-        gameStart(1);
+        gameStart(2);
         //menuStart();
 
         stage.show();
