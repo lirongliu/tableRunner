@@ -129,7 +129,7 @@ public class SceneController {
     }
 
     GameCharacter[] generateCharacter() {
-        int originalX = Main.SCENE_WIDTH / 3;
+        double originalX = Main.SCENE_WIDTH / 3;
 
         GameCharacter gameCharacter[] = new GameCharacter[numOfPlayers];
         for (int i = 0;i < numOfPlayers;i++) {
@@ -193,8 +193,9 @@ public class SceneController {
             Bounds bounds = obstacle.getBoundsInParent();
             double minX = bounds.getMinX() + sceneGroup[i].getTranslateX();
             double maxX = bounds.getMaxX() + sceneGroup[i].getTranslateX();
-            double minY = bounds.getMinY() + sceneGroup[i].getTranslateY();
-            double maxY = bounds.getMaxY() + sceneGroup[i].getTranslateY();
+            double minY = bounds.getMinY(); // + sceneGroup[i].getTranslateY();
+            double maxY = bounds.getMaxY(); // + sceneGroup[i].getTranslateY();
+            //if (obstacle instanceof Ground) System.out.println("minY: " + minY + ", " + "maxY: " + maxY);
 //            Bounds bounds = obstacle.getLayoutBounds();
 //            double translateX = obstacle.getTranslateX();
 //            double translateY = obstacle.getTranslateY();
@@ -207,7 +208,7 @@ public class SceneController {
             } else if (minX > Main.SCENE_WIDTH + clearThreshold) {
                 sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
-            }else if (minY > Main.SCENE_HEIGHT + clearThreshold) {
+            }else if (minY > Main.GROUND_HEIGHT) {
                 sceneGroup[i].getChildren().remove(obstacle);
                 iter.remove();
             }

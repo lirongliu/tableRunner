@@ -55,7 +55,6 @@ public class CircleObstacle extends Obstacle {
 
     @Override
     public CircleObstacle getDeepCopy() {
-        System.out.println("circle deep copy");
         return new CircleObstacle();
     }
 }
