@@ -1,11 +1,15 @@
 package sample;
 
+import javafx.animation.ParallelTransition;
+import javafx.animation.RotateTransition;
+import javafx.animation.TranslateTransition;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
-
-import java.util.Queue;
+import javafx.util.Duration;
 
 /**
  * Created by lirong on 10/1/14.
@@ -19,6 +23,9 @@ public class GameCharacter extends GameObject {
 
     private double leftBend;
     private double rightBend;
+
+    private boolean dead = false;
+    private boolean reviving = false;
 
     private Group body;
     private ImageView head;
@@ -121,7 +128,29 @@ public class GameCharacter extends GameObject {
     }
 
     public void die() {
-        System.out.println("DIE");
+
+        EventHandler<ActionEvent> eventOnFinished  = new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                dead = false;
+                reviving = true;
+            }
+        };
+
+        TranslateTransition translate = new TranslateTransition(Duration.millis(3000));
+        RotateTransition rotate = new RotateTransition(Duration.millis(500));
+        translate.setToY(-500);
+        rotate.setByAngle(-90);
+        translate.setAutoReverse(false);
+        rotate.setAutoReverse(false);
+
+        ParallelTransition transition = new ParallelTransition(this,
+                translate, rotate);
+        transition.play();
+
+        transition.setOnFinished(eventOnFinished);
+        dead = true;
     }
 
     public void accelerate(double aX, double aY) {
@@ -134,6 +163,7 @@ public class GameCharacter extends GameObject {
 
     public void jump(double power) {
         if (jumping) return;
+        if (velocityY > 2) return;      //  Temporary solution TODO: Fix it
         velocityY -= power / Main.fps;
         jumping = true;
         System.out.println("jump");
@@ -150,6 +180,7 @@ public class GameCharacter extends GameObject {
 
     @Override
     public void move() {
+        if (dead) return;
 
         //System.out.println(state);
 
@@ -221,6 +252,10 @@ public class GameCharacter extends GameObject {
         }*/
         this.setTranslateX(this.getTranslateX() + velocityX);
         this.setTranslateY(this.getTranslateY() + velocityY);
+
+//        System.out.println(this.getTranslateY());
+//        System.out.println(this.getBoundsInParent().getMaxY());
+
         updateSpeed();
     }
 
@@ -278,6 +313,7 @@ public class GameCharacter extends GameObject {
     }
 
     public void kick() {
+        if (dead) return;
         System.out.println("kick in GameCharacter.java");
     }
 
@@ -635,6 +671,19 @@ public class GameCharacter extends GameObject {
         if(prevState != state) {
             System.out.println("State: " + state);
         }
+    }
+
+    public boolean isDead() {
+        return dead;
+    }
+
+    public boolean isReviving() {
+        return reviving;
+    }
+
+    public void setAlive() {
+        dead = false;
+        reviving = false;
     }
 
     @Override

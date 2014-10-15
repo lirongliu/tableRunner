@@ -8,7 +8,7 @@ import javafx.scene.shape.Rectangle;
  * Created by lirong on 10/3/14.
  */
 public class Ground extends Obstacle {
-    public static int minGroundLength = 500;
+    public static int minGroundLength = 300;
     private double originalMaxX;
     private double length;
     private double posX;
@@ -43,7 +43,6 @@ public class Ground extends Obstacle {
 
     @Override
     public Ground getDeepCopy() {
-        System.out.println("ground deep copy");
         return new Ground(this.posX, this.length);
     }
 }

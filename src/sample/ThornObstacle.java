@@ -37,7 +37,6 @@ public class ThornObstacle extends Obstacle {
 
     @Override
     public ThornObstacle getDeepCopy() {
-        System.out.println("thorn deep copy");
         return new ThornObstacle(w, h, count);
     }
 }
