@@ -6,6 +6,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,6 +38,8 @@ public class SceneController {
 
     private Rectangle[] clippingRects;
 
+    private Text[] distLabel;
+
     private int numOfPlayers;
 
     public SceneController(Group root, int numOfPlayers) {
@@ -47,6 +51,7 @@ public class SceneController {
         cloudGroup = new Group[numOfPlayers];
         sceneGroup = new Group[numOfPlayers];
         clippingRects = new Rectangle[numOfPlayers];
+        distLabel = new Text[numOfPlayers];
 
         Image cloudImage = new Image("sample/images/CloudBG.png");
         for (int i = 0;i < numOfPlayers;i++) {
@@ -65,6 +70,10 @@ public class SceneController {
             sceneGroup[i].setClip(clippingRects[i]);
             root.getChildren().add(sceneGroup[i]);
             sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - (i * 384));
+
+            distLabel[i] = new Text(20, Main.SCENE_HEIGHT - 340 - (i * 384), "Player " + (i + 1) + ": 0 / " + GameEngine.endDistance);
+            distLabel[i].setFont(new Font(18));
+            root.getChildren().add(distLabel[i]);
         }
     }
 
@@ -225,6 +234,10 @@ public class SceneController {
 
     public Rectangle getClippingRect(int i) {
         return this.clippingRects[i];
+    }
+
+    public Text getDistLabel(int i) {
+        return this.distLabel[i];
     }
 
     public Ground getLastGroundObject(int i) { return lastGroundObject[i]; }

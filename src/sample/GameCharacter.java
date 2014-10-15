@@ -65,6 +65,8 @@ public class GameCharacter extends GameObject {
     private int prevAction;
     private int state;
 
+    private boolean walking = false;
+
     public GameCharacter() {
         velocityX = 0.0;
         velocityY = 0.0;
@@ -181,6 +183,11 @@ public class GameCharacter extends GameObject {
     @Override
     public void move() {
         if (dead) return;
+
+        if(walking) {
+            accelerate(300 / Main.fps, 0);
+            walking = false;
+        }
 
         //System.out.println(state);
 
@@ -309,7 +316,7 @@ public class GameCharacter extends GameObject {
     }
 
     public void walk() {
-        accelerate(300 / Main.fps, 0);
+        walking = true;
     }
 
     public void kick() {

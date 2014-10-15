@@ -63,21 +63,21 @@ public class MenuScene extends Scene {
                 if (now - lastSceneUpdateTime < 1e9 / Main.fps) return;
 
                 if((controller.instruction > 0) && (controller.instruction != 10)) {
-                    if(characters[1] == null && controller.instruction >= 2) {
-                        characters[1] = new GameCharacter();
-                        root.getChildren().add(characters[1]);
-                        characters[1].setTranslateX(200);
-                        characters[1].setTranslateY(500);
+                    if(characters[0] == null && controller.instruction >= 2) {
+                        characters[0] = new GameCharacter();
+                        root.getChildren().add(characters[0]);
+                        characters[0].setTranslateX(230);
+                        characters[0].setTranslateY(550);
                         player1Label.setText("Player 1 Found");
 
                         controller.setCharacters(characters);
                     }
 
-                    if(characters[0] == null && controller.instruction % 2 == 1) {
-                        characters[0] = new GameCharacter();
-                        root.getChildren().add(characters[0]);
-                        characters[0].setTranslateX(400);
-                        characters[0].setTranslateY(500);
+                    if(characters[1] == null && controller.instruction % 2 == 1) {
+                        characters[1] = new GameCharacter();
+                        root.getChildren().add(characters[1]);
+                        characters[1].setTranslateX(690);
+                        characters[1].setTranslateY(550);
                         player2Label.setText("Player 2 Found");
 
                         controller.setCharacters(characters);
@@ -94,13 +94,25 @@ public class MenuScene extends Scene {
                     }
                 }
 
+                if(characters[0] != null) {
+                    characters[0].move();
+                    characters[0].setTranslateX(230);
+                    characters[0].setTranslateY(550);
+                }
+
+                if(characters[1] != null) {
+                    characters[1].move();
+                    characters[1].setTranslateX(690);
+                    characters[1].setTranslateY(550);
+                }
+
                 if(countdown != null) {
                     long secondsRemain = 10 - (now - countdownStart) / 1000000000;
                     countdown.setText("Next game starts in " + secondsRemain + " " + (secondsRemain == 1 ? "second" : "seconds") + "...");
 
                     if(secondsRemain <= 0) {
                         timer.stop();
-                        parent.gameStart(2);
+                        parent.gameStart(characters.clone());
                     }
                 }
 
@@ -118,6 +130,9 @@ public class MenuScene extends Scene {
                 characters[i] = null;
             }
         }
+
+        player1Label.setText("Waiting for Player 1");
+        player2Label.setText("Waiting for Player 2");
 
         root.getChildren().remove(countdown);
         countdown = null;

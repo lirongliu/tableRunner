@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
 
 import java.util.Iterator;
@@ -27,6 +28,7 @@ public class GameEngine {
     private GameCharacter gameCharacter[];
     private SceneController sceneController;
     private Rectangle[] clippingRects;
+    private Text[] distLabels;
     private Scene scene;
 
     private long lastSceneUpdateTime;
@@ -72,8 +74,8 @@ public class GameEngine {
 
     private boolean gonnaEnd = false;
     private boolean end = false;
-    private int gonnaEndDistance = 7500;
-    private int endDistance = 10000;
+    private int gonnaEndDistance = 9000;
+    public static int endDistance = 13000;
 
 
     public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers, SerialController controller, Main parent) {
@@ -93,6 +95,7 @@ public class GameEngine {
         this.cloudGroup = new Group[numOfPlayers];
         this.sceneGroup = new Group[numOfPlayers];
         this.clippingRects = new Rectangle[numOfPlayers];
+        this.distLabels = new Text[numOfPlayers];
         this.numOfPlayers = numOfPlayers;
         this.scene = scene;
         this.sceneController = sceneController;
@@ -104,6 +107,7 @@ public class GameEngine {
             cloudGroup[i] = sceneController.getCloudGroup(i);
             sceneGroup[i] = sceneController.getSceneGroup(i);
             clippingRects[i] = sceneController.getClippingRect(i);
+            distLabels[i] = sceneController.getDistLabel(i);
         }
 
         this.controller = controller;
@@ -236,44 +240,53 @@ public class GameEngine {
 //                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
 //                    }
                 }
+
+                int fasterPlayerIndex = 0;
                 if (numOfPlayers == 2) {
-                    int fasterPlayerIndex = cumulativeSceneDistance[1] - cumulativeSceneDistance[0] > 0 ? 1 : 0;
-                    int slowerPlayerIndex = 1 - fasterPlayerIndex;
-                    Ground ground = sceneController.getLastGroundObject(fasterPlayerIndex);
+                    fasterPlayerIndex = cumulativeSceneDistance[1] - cumulativeSceneDistance[0] > 0 ? 1 : 0;
+                }
+                Ground ground = sceneController.getLastGroundObject(fasterPlayerIndex);
 
-                    double groundGap = ground.getGap(sceneGroup[fasterPlayerIndex].getTranslateX());
-                    if (groundGap > groundGapLength) {
-                        int groundLength;
-                        if (!gonnaEnd) {
-                            groundLength = rand.nextInt(2500) + Ground.minGroundLength;
-                        } else {
-                            groundLength = rand.nextInt(300) + Ground.minGroundLength;
-                        }
-                        Ground newGround = sceneController.drawGround(
-                                fasterPlayerIndex,
-                                Main.SCENE_WIDTH - sceneGroup[fasterPlayerIndex].getTranslateX(),
-                                groundLength);
-                        groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
+                double groundGap = ground.getGap(sceneGroup[fasterPlayerIndex].getTranslateX());
+                if (groundGap > groundGapLength) {
+                    int groundLength;
+                    if (!gonnaEnd) {
+                        groundLength = rand.nextInt(2500) + Ground.minGroundLength;
+                    } else {
+                        groundLength = rand.nextInt(300) + Ground.minGroundLength;
+                    }
+                    Ground newGround = sceneController.drawGround(
+                            fasterPlayerIndex,
+                            Main.SCENE_WIDTH - sceneGroup[fasterPlayerIndex].getTranslateX(),
+                            groundLength);
+                    groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
 
+                    if (numOfPlayers == 2) {
                         bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newGround.getDeepCopy()));
                     }
+                }
 
-                    if (!end && !gonnaEnd && cumulativeSceneDistance[fasterPlayerIndex] - lastObstacleGeneratingDistance[fasterPlayerIndex] > obstacleGapLength && groundGap < -100) {
-                        Obstacle newObstacle = sceneController.generateObstacle(fasterPlayerIndex);
-                        lastObstacleGeneratingDistance[fasterPlayerIndex] = cumulativeSceneDistance[fasterPlayerIndex];
-                        obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
+                if (!end && !gonnaEnd && cumulativeSceneDistance[fasterPlayerIndex] - lastObstacleGeneratingDistance[fasterPlayerIndex] > obstacleGapLength && groundGap < -100) {
+                    Obstacle newObstacle = sceneController.generateObstacle(fasterPlayerIndex);
+                    lastObstacleGeneratingDistance[fasterPlayerIndex] = cumulativeSceneDistance[fasterPlayerIndex];
+                    obstacleGapLength = minObstacleInterval + rand.nextInt((int) (maxObstacleInterval - minObstacleInterval));
+                    if (numOfPlayers == 2) {
                         bufferedObstacles.add(new Pair<Double, Obstacle>(cumulativeSceneDistance[fasterPlayerIndex], newObstacle.getDeepCopy()));
                     }
+                }
 
-                    if (cumulativeSceneDistance[fasterPlayerIndex] > gonnaEndDistance) {
-                        gonnaEnd = true;
-                    }
+                if (cumulativeSceneDistance[fasterPlayerIndex] > gonnaEndDistance) {
+                    gonnaEnd = true;
+                }
 
-                    if (cumulativeSceneDistance[fasterPlayerIndex] > endDistance) {
-                        gonnaEnd = false;
-                        end = true;
-                        gameEnd();
-                    }
+                if (cumulativeSceneDistance[fasterPlayerIndex] > endDistance) {
+                    gonnaEnd = false;
+                    end = true;
+                    gameEnd();
+                }
+
+                if (numOfPlayers == 2) {
+                    int slowerPlayerIndex = 1 - fasterPlayerIndex;
 
                     if (bufferedObstacles.isEmpty() == false) {
                         if (cumulativeSceneDistance[slowerPlayerIndex] >= bufferedObstacles.peek().getKey()) {
@@ -294,6 +307,11 @@ public class GameEngine {
                         }
                     }
                 }
+
+                for(int i = 0; i < distLabels.length; ++i) {
+                    distLabels[i].setText("Player " + (i + 1) + ": " + Math.round(cumulativeSceneDistance[i]) + " / " + GameEngine.endDistance);
+                }
+
                 lastSceneUpdateTime = now;
             }
         };
@@ -352,6 +370,7 @@ public class GameEngine {
                 obj.horizontalCollision(obstacle);
                 obstacle.horizontalCollision(obj);
             } else if (objMaxY >= obstacleMinY) {
+                System.out.println("collision downward");
                 obj.collisionDownward(obstacleMinY, obstacle);
             }
         }

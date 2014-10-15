@@ -68,11 +68,17 @@ public class Main extends Application {
         stage.show();
     }
 
-    public void gameStart(int numOfPlayers) {
+    public void gameStart(GameCharacter[] characters) {
         root = new Group();
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT, Color.WHITE);
 
-        this.numOfPlayers = numOfPlayers;
+        this.numOfPlayers = 0;
+
+        for(int i = 0; i < characters.length; ++i) {
+            if(characters[i] != null) {
+                numOfPlayers++;
+            }
+        }
 
         sceneController = new SceneController(root, numOfPlayers);
         gameCharacter = sceneController.generateCharacter();
@@ -81,7 +87,17 @@ public class Main extends Application {
         }
         gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers, controller, this);
 
-        controller.setCharacters(gameCharacter);
+        if(numOfPlayers == 1) {
+            for(int i = 0; i < characters.length; ++i) {
+                if(characters[i] != null) {
+                    characters[i] = gameCharacter[0];
+                }
+            }
+
+            controller.setCharacters(characters);
+        } else {
+            controller.setCharacters(gameCharacter);
+        }
 
         gameEngine.setup();
         gameEngine.run();
