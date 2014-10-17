@@ -53,7 +53,9 @@ public class SceneController {
         clippingRects = new Rectangle[numOfPlayers];
         distLabel = new Text[numOfPlayers];
 
+        Image flagImage = new Image("sample/images/Flag.png");
         Image cloudImage = new Image("sample/images/CloudBG.png");
+
         for (int i = 0;i < numOfPlayers;i++) {
             obstacleQueue[i] = new LinkedList<Obstacle>();
 //            groundQueue[i] = new LinkedList<Ground>();
@@ -70,6 +72,11 @@ public class SceneController {
             sceneGroup[i].setClip(clippingRects[i]);
             root.getChildren().add(sceneGroup[i]);
             sceneGroup[i].setTranslateY(Main.SCENE_HEIGHT - Main.GROUND_HEIGHT - (i * 384));
+
+            ImageView flag = new ImageView(flagImage);
+            sceneGroup[i].getChildren().add(flag);
+            flag.setTranslateX(GameEngine.endDistance + 512);
+            flag.setTranslateY(Main.GROUND_HEIGHT - 200);
 
             distLabel[i] = new Text(20, Main.SCENE_HEIGHT - 340 - (i * 384), "Player " + (i + 1) + ": 0 / " + GameEngine.endDistance);
             distLabel[i].setFont(new Font(18));

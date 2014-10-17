@@ -62,7 +62,11 @@ public class Main extends Application {
             }
         });
 
-        //gameStart(1);
+        /*GameCharacter[] characters = new GameCharacter[2];
+        characters[0] = new GameCharacter();
+        characters[1] = null;
+
+        gameStart(characters);*/
         menuStart();
 
         stage.show();
@@ -85,7 +89,7 @@ public class Main extends Application {
         for (int i = 0;i < numOfPlayers;i++) {
             sceneController.generateInitialScene(i);
         }
-        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers, controller, this);
+        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers, controller, this, root);
 
         if(numOfPlayers == 1) {
             for(int i = 0; i < characters.length; ++i) {

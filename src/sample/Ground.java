@@ -8,7 +8,7 @@ import javafx.scene.shape.Rectangle;
  * Created by lirong on 10/3/14.
  */
 public class Ground extends Obstacle {
-    public static int minGroundLength = 150;
+    public static int minGroundLength = 500;
     private double originalMaxX;
     private double length;
     private double posX;

@@ -18,8 +18,8 @@ import javax.xml.crypto.dsig.keyinfo.KeyValue;
 public class RectangleObstacle extends Obstacle {
     public static int minObstacleWidth = 30;
     public static int maxObstacleWidth = 100;
-    public static int minObstacleHeight = 20;
-    public static int maxObstacleHeight = 250;
+    public static int minObstacleHeight = 30;
+    public static int maxObstacleHeight = 130;
     private int w, h;
     private Rectangle rec;
 

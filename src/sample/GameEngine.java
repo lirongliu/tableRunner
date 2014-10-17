@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
 
@@ -34,8 +35,8 @@ public class GameEngine {
     private long lastSceneUpdateTime;
     private double lastObstacleGeneratingDistance[];  //  absolute value
     private double cumulativeSceneDistance[]; //  absolute value
-    private double minObstacleInterval = 300;  //  distance
-    private double maxObstacleInterval = 1000;  //  distance
+    private double minObstacleInterval = 700;  //  distance
+    private double maxObstacleInterval = 1200;  //  distance
     private double acceleration = 100;
 
     final public static double maxJumpingPower = 1500;     //  Increased Y velocity
@@ -61,8 +62,8 @@ public class GameEngine {
     private Group cloudGroup[];
     private Group sceneGroup[];
 
-    private double minGroundGapLength = 80;
-    private int groundGapLengthVariation = 200;
+    private double minGroundGapLength = 50;
+    private int groundGapLengthVariation = 70;
     private double groundGapLength = rand.nextInt(groundGapLengthVariation) + minGroundGapLength;
 
     private double obstacleGapLength = minObstacleInterval + rand.nextInt((int)(maxObstacleInterval - minObstacleInterval));
@@ -77,8 +78,11 @@ public class GameEngine {
     private int gonnaEndDistance = 9000;
     public static int endDistance = 13000;
 
+    private Group root;
 
-    public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers, SerialController controller, Main parent) {
+
+    public GameEngine(Scene scene, SceneController sceneController, GameCharacter[] gameCharacter, int numOfPlayers, SerialController controller, Main parent, Group root) {
+        this.root = root;
         lastJumpPressTime = new long[numOfPlayers];
         jumpKeyRelease = new boolean[numOfPlayers];
         for (int i = 0;i < numOfPlayers;i++) {
@@ -253,7 +257,7 @@ public class GameEngine {
                     if (!gonnaEnd) {
                         groundLength = rand.nextInt(2500) + Ground.minGroundLength;
                     } else {
-                        groundLength = rand.nextInt(300) + Ground.minGroundLength;
+                        groundLength = rand.nextInt(500) + Ground.minGroundLength;
                     }
                     Ground newGround = sceneController.drawGround(
                             fasterPlayerIndex,
@@ -282,7 +286,7 @@ public class GameEngine {
                 if (cumulativeSceneDistance[fasterPlayerIndex] > endDistance) {
                     gonnaEnd = false;
                     end = true;
-                    gameEnd();
+                    gameEnd(fasterPlayerIndex);
                 }
 
                 if (numOfPlayers == 2) {
@@ -494,7 +498,11 @@ public class GameEngine {
         }
     }
 
-    private void gameEnd() {
+    private void gameEnd(int fasterPlayerIndex) {
+        Text winMessage = new Text(Main.SCENE_WIDTH / 2 - 100, Main.SCENE_HEIGHT / 2 - 10, "Player " + (fasterPlayerIndex + 1) + " wins!");
+        winMessage.setFont(new Font(25));
+        root.getChildren().add(winMessage);
+
         System.out.println("end");
     }
 }

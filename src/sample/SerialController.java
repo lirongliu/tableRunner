@@ -81,8 +81,13 @@ public class SerialController implements SerialPortEventListener {
                 serialPort.purgePort(SerialPort.PURGE_RXCLEAR);
 
                 // Now, request more data from the Arduino
-                //if(instruction ==)
-                serialPort.writeByte((byte) 'x');
+                if(instruction == 1) {
+                    serialPort.writeByte((byte) '1');
+                } else if(instruction == 2) {
+                    serialPort.writeByte((byte) '2');
+                } else {
+                    serialPort.writeByte((byte) 'x');
+                }
             }
         }
         catch (SerialPortException ex) {

@@ -107,7 +107,7 @@ public class MenuScene extends Scene {
                 }
 
                 if(countdown != null) {
-                    long secondsRemain = 10 - (now - countdownStart) / 1000000000;
+                    long secondsRemain = 15 - (now - countdownStart) / 1000000000;
                     countdown.setText("Next game starts in " + secondsRemain + " " + (secondsRemain == 1 ? "second" : "seconds") + "...");
 
                     if(secondsRemain <= 0) {

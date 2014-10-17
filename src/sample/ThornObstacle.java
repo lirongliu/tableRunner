@@ -11,7 +11,7 @@ public class ThornObstacle extends Obstacle {
     public static int minObstacleWidth = 30;
     public static int maxObstacleWidth = 100;
     public static int minObstacleHeight = 20;
-    public static int maxObstacleHeight = 100;
+    public static int maxObstacleHeight = 60;
     public static int maxThornCountInARow = 6;
     public static int minThornCountInARow = 2;
 

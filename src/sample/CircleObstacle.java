@@ -10,13 +10,13 @@ import java.util.Random;
  * Created by lirong on 10/3/14.
  */
 public class CircleObstacle extends Obstacle {
-    private static double circleObstacleVelocityX = 3 * GameEngine.defaultSceneSpeed;
+    private static double circleObstacleVelocityX = 2 * GameEngine.defaultSceneSpeed;
     private double radius = 30;
 
     public CircleObstacle() {
         super(0, 0);
         Random rand = new Random();
-        velocityX = (rand.nextInt(5) + 1) * GameEngine.defaultSceneSpeed;
+        velocityX = (rand.nextInt(4) + 1) * GameEngine.defaultSceneSpeed;
         Circle circle = new Circle(radius, -radius, radius);
         circle.setFill(Color.BLACK);
         getChildren().add(circle);
