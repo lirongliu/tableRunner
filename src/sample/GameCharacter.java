@@ -11,6 +11,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
+import java.util.Random;
+
 /**
  * Created by lirong on 10/1/14.
  */
@@ -39,15 +41,6 @@ public class GameCharacter extends GameObject {
     private Group rightKnee;
     private ImageView rightShin;
     private ImageView rightFoot;
-
-    //private float[][] leftStates = {{  0,   0, 0},
-    //                                {-40,  80, -40},
-      //                              {-80, 160, -80}};
-
-    //private float[][] rightStates = {{  0,   0, 0},
-        //                            {-40,  80, -40},
-          //                          {-80, 160, -80}};
-
 
     private float[][] leftStates = {{-30, 10, 20}, {0,  0, 0}, { 30,  10, -40}};
 
@@ -156,7 +149,6 @@ public class GameCharacter extends GameObject {
     }
 
     public void accelerate(double aX, double aY) {
-        //if (jumping) return;
         velocityX += aX;
         velocityY += aY;
         speedWhenLastAccelerate = velocityX;
@@ -165,7 +157,6 @@ public class GameCharacter extends GameObject {
 
     public void jump(double power) {
         if (jumping) return;
-        if (velocityY > 2) return;      //  Temporary solution TODO: Fix it
         velocityY -= power / Main.fps;
         jumping = true;
         System.out.println("jump");
@@ -189,8 +180,7 @@ public class GameCharacter extends GameObject {
             walking = false;
         }
 
-        //System.out.println(state);
-
+        // Graphics detail is only for glove mode
         leftHip.getTransforms().clear();
         leftKnee.getTransforms().clear();
         leftFoot.getTransforms().clear();
@@ -223,46 +213,12 @@ public class GameCharacter extends GameObject {
         }
 
 
-        /*if((state == 9) || (state == 9) || (state == 10) || (state == 10)) {
-
-            leftHip.getTransforms().add(new Rotate(120 * leftBend - 60));
-            rightHip.getTransforms().add(new Rotate(120 * rightBend - 60));
-
-            //rightLegLower.getTransforms().add(new Rotate(160 * (-1 * rightBend*(rightBend-2)), 3, 2.5));
-            if((state == 2) || (state == 9)) {
-                leftKnee.getTransforms().add(new Rotate(-160 * (Math.pow((leftBend - 1), 2) - 1)));
-                rightKnee.getTransforms().add(new Rotate(160 * Math.pow(rightBend, 2)));
-            } else {
-                leftKnee.getTransforms().add(new Rotate(160 * Math.pow(leftBend, 2)));
-                rightKnee.getTransforms().add(new Rotate(-160 * (Math.pow((rightBend - 1), 2) - 1)));
-            }
-        } else {
-            leftHip.getTransforms().add(new Rotate(-80 * leftBend));
-            rightHip.getTransforms().add(new Rotate(-80 * rightBend));
-            leftKnee.getTransforms().add(new Rotate(160 * leftBend));
-            rightKnee.getTransforms().add(new Rotate(160 * rightBend));
-        }*/
-
-
         double vertOffset = body.getBoundsInLocal().getMaxY();
 
         body.setTranslateY(-vertOffset);
 
-
-       // System.out.println("pos: " + getPositionX());
-        /*if (getTranslateX() > 512 && velocityX > 0) {
-            GameEngine.updateSceneSpeed(-velocityX + GameEngine.defaultSceneSpeed);
-            //System.out.println("pass mid point");
-        } else {
-            this.setTranslateX(this.getTranslateX() + velocityX);
-            GameEngine.updateSceneSpeed(GameEngine.defaultSceneSpeed);
-        }*/
         this.setTranslateX(this.getTranslateX() + velocityX);
         this.setTranslateY(this.getTranslateY() + velocityY);
-
-//        System.out.println(this.getTranslateY());
-//        System.out.println(this.getBoundsInParent().getMaxY());
-
         updateSpeed();
     }
 
@@ -294,25 +250,32 @@ public class GameCharacter extends GameObject {
         return System.nanoTime();
     }
 
+    /* Only for glove mode.
+     * gesture:
+     *      0: Both the left leg and right leg are straight
+     *      1: Left leg is straight while right leg is bent
+     *      2: Right leg is straight while left leg is bent
+     *      3: Both the left leg and right leg are bent
+     */
     public void setBend(double leftBend, double rightBend) {
         this.leftBend = leftBend;
         this.rightBend = rightBend;
-        int action = -1;
+        int gesture = -1;
         if (leftBend < NOT_BEND) {
             if (rightBend < NOT_BEND) {
-                action = 0;    //  not considered right now
+                gesture = 0;    //  not considered right now
             } else if (rightBend > BEND) {
-                action = 1;
+                gesture = 1;
             }
         } else if (leftBend > BEND) {
             if (rightBend < NOT_BEND) {
-                action = 2;
+                gesture = 2;
             } else if (rightBend > BEND) {
-                action = 3;
+                gesture = 3;
             }
         }
-        //System.out.println("leftBend: " + leftBend + "\t" + "rightBend: " + rightBend + "\t" + "action: " + action);
-        DFA(action);
+        //System.out.println("leftBend: " + leftBend + "\t" + "rightBend: " + rightBend + "\t" + "gesture: " + gesture);
+        DFA(gesture);
     }
 
     public void walk() {
@@ -341,35 +304,38 @@ public class GameCharacter extends GameObject {
         land(y);
     }
 
-    private void DFA(int action) {
+    /* Only for glove mode.
+     * It is a Deterministic Finite Automata model used to interpret the game character's action
+     */
+    private void DFA(int gesture) {
 
-        int prevState = state;
+        int prevGesture = state;
 
-        if (action < 0) return;
-        if (prevAction == action) return;
-        if (action == 0) {
+        if (gesture < 0) return;
+        if (prevGesture == gesture) return;
+        if (gesture == 0) {
             readyToJumpTime = now();
         }
 
         switch (state) {
             case 0:
                 // Initial state
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 1;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 3;
                 }
                 break;
             case 1:
                 // Lift up Leg A
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
                 } else {
-                    if (action == 2) {
+                    if (gesture == 2) {
                         state = 9;
-                    } else if (action == 3) {
+                    } else if (gesture == 3) {
                         state = 12;
                     }
                     walk();
@@ -377,23 +343,23 @@ public class GameCharacter extends GameObject {
                 break;
             case 2:
                 /*// Put down Leg A. Just finished one step.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 5;
                     kick();
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 3;
                 }
                 break;*/
             case 3:
                 // Lift up Leg B
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
                 } else {
-                    if (action == 1) {
+                    if (gesture == 1) {
                         state = 10;
-                    } else if (action == 3) {
+                    } else if (gesture == 3) {
                         state = 12;
                     }
                     walk();
@@ -401,65 +367,65 @@ public class GameCharacter extends GameObject {
                 break;
             case 4:
                 /*// Put down Leg B. Just finished one step.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 1;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 7;
                     kick();
                 }
                 break;*/
             case 5:
                 // Lift up Leg A. Just finished kicking.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 9;
                     walk();
-                } else if (action == 3) {
+                } else if (gesture == 3) {
                     state = 6;
                 }
                 break;
             case 6:
                 // Put down Leg A.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 5;
                     kick();
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 3;
                 }
                 break;
             case 7:
                 // Lift up Leg B. Just finished kicking.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 10;
                     walk();
-                } else if (action == 3) {
+                } else if (gesture == 3) {
                     state = 8;
                 }
                 break;
             case 8:
                 // Put down Leg B.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 1;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 7;
                     kick();
                 }
                 break;
             case 9:
                 // Put down Leg A while lifting Leg B. Just finished one step.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
                 } else {
-                    if (action == 1) {
+                    if (gesture == 1) {
                         state = 10;
 
                         rightStates[1][0] = -50;
@@ -469,7 +435,7 @@ public class GameCharacter extends GameObject {
                         leftStates[1][0] = 0;
                         leftStates[1][1] = 0;
                         leftStates[1][2] = 0;
-                    } else if (action == 3) {
+                    } else if (gesture == 3) {
                         state = 12;
                     }
                     walk();
@@ -477,10 +443,10 @@ public class GameCharacter extends GameObject {
                 break;
             case 10:
                 // Put down Leg B while lifting Leg A. Just finished one step.
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
                 } else {
-                    if (action == 2) {
+                    if (gesture == 2) {
                         state = 9;
 
                         leftStates[1][0] = -50;
@@ -490,7 +456,7 @@ public class GameCharacter extends GameObject {
                         rightStates[1][0] = 0;
                         rightStates[1][1] = 0;
                         rightStates[1][2] = 0;
-                    } else if (action == 3) {
+                    } else if (gesture == 3) {
                         state = 12;
                     }
                     walk();
@@ -498,184 +464,30 @@ public class GameCharacter extends GameObject {
                 break;
             case 11:
                 // Ready to jump.
-                if (action == 1) {
+                if (gesture == 1) {
                     state = 1;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 3;
-                } else if (action == 3) {
+                } else if (gesture == 3) {
                     //jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
                     state = 12;
                 }
                 break;
             case 12:
                 // Jump
-                if (action == 0) {
+                if (gesture == 0) {
                     state = 11;
                     jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
-                } else if (action == 1) {
+                } else if (gesture == 1) {
                     state = 1;
-                } else if (action == 2) {
+                } else if (gesture == 2) {
                     state = 3;
                 }
                 break;
         }
+        prevGesture = gesture;
 
-
-        /*switch (state) {
-            case 0:
-                // Initial state
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 1;
-                } else if (action == 2) {
-                    state = 3;
-                }
-                break;
-            case 1:
-                // Lift up Leg A
-                if (action == 0) {
-                    state = 11;
-                } else {
-                    if (action == 2) {
-                        state = 9;
-                    } else if (action == 3) {
-                        state = 2;
-                    }
-                    walk();
-                }
-                break;
-            case 2:
-                // Put down Leg A. Just finished one step.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 5;
-                    kick();
-                } else if (action == 2) {
-                    state = 3;
-                }
-                break;
-            case 3:
-                // Lift up Leg B
-                if (action == 0) {
-                    state = 11;
-                } else {
-                    if (action == 1) {
-                        state = 10;
-                    } else if (action == 3) {
-                        state = 4;
-                    }
-                    walk();
-                }
-                break;
-            case 4:
-                // Put down Leg B. Just finished one step.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 1;
-                } else if (action == 2) {
-                    state = 7;
-                    kick();
-                }
-                break;
-            case 5:
-                // Lift up Leg A. Just finished kicking.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 2) {
-                    state = 9;
-                    walk();
-                } else if (action == 3) {
-                    state = 6;
-                }
-                break;
-            case 6:
-                // Put down Leg A.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 5;
-                    kick();
-                } else if (action == 2) {
-                    state = 3;
-                }
-                break;
-            case 7:
-                // Lift up Leg B. Just finished kicking.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 10;
-                    walk();
-                } else if (action == 3) {
-                    state = 8;
-                }
-                break;
-            case 8:
-                // Put down Leg B.
-                if (action == 0) {
-                    state = 11;
-                } else if (action == 1) {
-                    state = 1;
-                } else if (action == 2) {
-                    state = 7;
-                    kick();
-                }
-                break;
-            case 9:
-                // Put down Leg A while lifting Leg B. Just finished one step.
-                if (action == 0) {
-                    state = 11;
-                } else {
-                    if (action == 1) {
-                        state = 10;
-                    } else if (action == 3) {
-                        state = 4;
-                    }
-                    walk();
-                }
-                break;
-            case 10:
-                // Put down Leg B while lifting Leg A. Just finished one step.
-                if (action == 0) {
-                    state = 11;
-                } else {
-                    if (action == 2) {
-                        state = 9;
-                    } else if (action == 3) {
-                        state = 2;
-                    }
-                    walk();
-                }
-                break;
-            case 11:
-                // Ready to jump.
-                if (action == 1) {
-                    state = 1;
-                } else if (action == 2) {
-                    state = 3;
-                } else if (action == 3) {
-                    //jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
-                    state = 12;
-                }
-                break;
-            case 12:
-                // Jump
-                if (action == 0) {
-                    state = 11;
-                    jump(Math.min(GameEngine.maxJumpingPower, GameEngine.maxJumpingPower * 200 / (double)((now() - readyToJumpTime) / 1e6)));
-                } else if (action == 1) {
-                    state = 1;
-                } else if (action == 2) {
-                    state = 3;
-                }
-                break;
-        }*/
-        prevAction = action;
-
-        if(prevState != state) {
+        if(prevGesture != state) {
             //System.out.println("State: " + state);
         }
     }

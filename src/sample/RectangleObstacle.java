@@ -61,7 +61,6 @@ public class RectangleObstacle extends Obstacle {
             translate[i] = new TranslateTransition(Duration.millis(1500));
             translate[i].setToX(-2000 + (4000 * (i & 1)));
             translate[i].setToY(-2000 + (4000 * (i / 2)));
-            //translate[i].play();
 
             ParallelTransition transition = new ParallelTransition(subRec[i],
                     translate[i]);

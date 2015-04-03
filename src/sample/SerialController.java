@@ -10,7 +10,7 @@ public class SerialController implements SerialPortEventListener {
 
     private GameCharacter[] players;  // For now, this directly dumps input data into the game character
 
-    private String[] portnames = {"/dev/tty.usbmodemfd121", "/dev/tty.usbmodemfa131"};
+    private String[] portnames = {"/dev/tty.usbmodemfd121", "/dev/tty.usbmodemfa131", "/dev/tty.usbmodem1421"};
 
     private Main parent;
 

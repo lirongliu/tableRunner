@@ -17,20 +17,11 @@ public class Ground extends Obstacle {
         Rectangle rec = new Rectangle(posX, 0, length, Main.GROUND_HEIGHT);
         rec.setStroke(Color.BLACK);
         rec.setFill(Color.WHITE);
-        //rec.setFill(Color.BLACK);
         originalMaxX = posX + length;
         this.length = length;
         this.posX = posX;
 
         getChildren().add(rec);
-//        Line line = new Line(posX, 0,
-//                posX + length, 0);
-//        this.length = length;
-//        originalMaxX = posX + length;
-//        this.originalSceneGroupTranslate = originalSceneGroupTranslate;
-//        line.setFill(Color.BLACK);
-//
-//        getChildren().add(line);
     }
 
     public double getLength() {
@@ -38,7 +29,7 @@ public class Ground extends Obstacle {
     }
 
     public double getGap(double newSceneGroupTranslate) {
-        return Main.SCENE_WIDTH - newSceneGroupTranslate - originalMaxX;    //  Cound be negative
+        return Main.SCENE_WIDTH - newSceneGroupTranslate - originalMaxX;    //  Could be negative
     }
 
     @Override

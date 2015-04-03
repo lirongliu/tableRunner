@@ -4,14 +4,11 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.PrintStream;
-import java.util.Queue;
-import java.util.Random;
 
 
 // TODO: (FIX ME) When falling from an object, gc can still jump.
@@ -36,7 +33,7 @@ public class Main extends Application {
     private SceneController sceneController;
     private GameEngine gameEngine;
 
-    private SerialController controller;
+    private SerialController serialController;
 
     private int numOfPlayers;
 
@@ -46,28 +43,36 @@ public class Main extends Application {
         launch(args);
     }
 
+    private boolean testWithKeyboard = true;
+
     @Override
     public void start(Stage stage) {
-        //root = new Group();
-        //Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT, Color.WHITE);
         this.stage = stage;
-        stage.setTitle("Physical Computing Midterm");
+//        stage.setTitle("Physical Computing Midterm");
+        stage.setTitle("Glove Runner");
 
-        controller = new SerialController();
-        controller.initialize(this);
+        serialController = new SerialController();
+        serialController.initialize(this);
 
         stage.setOnHiding(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent event) {
-                controller.close();
+                serialController.close();
             }
         });
 
-        /*GameCharacter[] characters = new GameCharacter[2];
-        characters[0] = new GameCharacter();
-        characters[1] = null;
-
-        gameStart(characters);*/
-        menuStart();
+        if (testWithKeyboard) {
+            /* for testing with keyboard
+             * player 1: Down and Right arrows are for acceleration; Space is for jumping; K is for kicking
+             * player 2: S, D are for acceleration; Q is for jumping; A is for kicking
+             */
+            GameCharacter[] gameCharacters = new GameCharacter[2];
+            gameCharacters[0] = new GameCharacter();
+            gameCharacters[1] = new GameCharacter();
+            gameStart(gameCharacters);
+        } else {
+            /* Play with glove */
+            menuStart();
+        }
 
         stage.show();
     }
@@ -89,7 +94,8 @@ public class Main extends Application {
         for (int i = 0;i < numOfPlayers;i++) {
             sceneController.generateInitialScene(i);
         }
-        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers, controller, this, root);
+        
+        gameEngine = new GameEngine(scene, sceneController, gameCharacter, numOfPlayers, serialController, this, root);
 
         if(numOfPlayers == 1) {
             for(int i = 0; i < characters.length; ++i) {
@@ -98,9 +104,9 @@ public class Main extends Application {
                 }
             }
 
-            controller.setCharacters(characters);
+            serialController.setCharacters(characters);
         } else {
-            controller.setCharacters(gameCharacter);
+            serialController.setCharacters(gameCharacter);
         }
 
         gameEngine.setup();
@@ -111,7 +117,7 @@ public class Main extends Application {
     public void menuStart() {
         if(menuRoot == null) {
             menuRoot = new Group();
-            menuScene = new MenuScene(menuRoot, this, controller);
+            menuScene = new MenuScene(menuRoot, this, serialController);
         } else {
             menuScene.clean();
         }
